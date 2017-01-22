@@ -11,19 +11,23 @@ namespace Minor.WSA.Infrastructure
         /// <summary>
         /// Default: "WSA.DefaultEventBus"
         /// </summary>
-        public string ExchangeName { get; set; }
+        public string ExchangeName { get; private set; }
         /// <summary>
         /// Default HostName: "localhost"
         /// </summary>
-        public string HostName { get; set; }
+        public string HostName { get; private set; }
         /// <summary>
         /// Default Port: 5672
         /// </summary>
-        public int Port { get; set; }
+        public int Port { get; private set; }
         /// <summary>
         /// Default UserName: "guest"
         /// </summary>
-        public string UserName { get; set; }
+        public string UserName { get; private set; }
+        /// <summary>
+        /// Default Password: "guest"
+        /// </summary>
+        public string Password { get; private set; }
 
         /// <summary>
         /// Makes a copy of the Busoptions, replacing all provided parameters
@@ -46,21 +50,22 @@ namespace Minor.WSA.Infrastructure
             };
         }
 
-        /// <summary>
-        /// Default Password: "guest"
-        /// </summary>
-        public string Password { get; set; }
 
         /// <summary>
         /// Initializes with default BusOptions
         /// </summary>
-        public BusOptions()
+        public BusOptions(
+                string exchangeName = "WSA.DefaultEventBus",
+                string hostName = "localhost",
+                int    port = 5672,
+                string userName = "guest",
+                string password = "guest")
         {
-            ExchangeName = "WSA.DefaultEventBus";
-            HostName = "localhost";
-            Port = 5672;
-            UserName = "guest";
-            Password = "guest";
+            ExchangeName = exchangeName;
+            HostName = hostName;
+            Port = port;
+            UserName = userName;
+            Password = password;
         }
 
         /// <summary>

@@ -17,9 +17,11 @@ namespace Minor.WSA.Infrastructure.Test.TestApp
                             //.AddController<MyController>()        // Explicitly add Controller
                             //.EnableLogging(LogLevel.Debug)
                             //.CreateSwaggerEndpoint()     // Expose Metadata in Swagger-format
-                            .CreateHost();
+                            //.DelayStartup(optinalEnvironmentVarName);    // EnviromnentVarName defaults to startupDelayInSeconds, delaytime defaults to 0
+                            .CreateHost();  // Opens RabbitMQ connections and queues (the queues receive messages, the host only after start)
 
-            host.Start();
+            //host.StartAfterReplay(optionalEnvironmentVarAuditlogEndpointName);
+            //host.Start();
         }
     }
 }

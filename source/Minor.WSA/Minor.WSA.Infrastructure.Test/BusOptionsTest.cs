@@ -74,13 +74,13 @@ public class BusOptionsTest
     {
         // Arrange
         var target = new BusOptions
-        {
-            ExchangeName = "Eventbus",
-            HostName = "ServerName",
-            Port = 12345,
-            UserName = "Jan",
-            Password = "&Alleman",
-        };
+        (
+            exchangeName: "Eventbus",
+            hostName: "ServerName",
+            port: 12345,
+            userName: "Jan",
+            password: "&Alleman"
+        );
 
         // Act
         var result = target.ToString();
