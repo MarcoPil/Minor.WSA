@@ -1,10 +1,12 @@
 ﻿using Minor.WSA.Common;
 using Minor.WSA.Infrastructure;
+using Minor.WSA.Infrastructure.Test;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -25,7 +27,7 @@ public class EventPublisherTest
 
             channel.QueueBind(queue: listenQueueName,
                               exchange: "TestEventbus",
-                              routingKey: "TestEvent");
+                              routingKey: "Minor.WSA.PublisherTestEvent");
 
             var eventEmitted = false;
             BasicDeliverEventArgs receivedEvent = null;
@@ -54,10 +56,18 @@ public class EventPublisherTest
                 // Assert
                 if (handle.WaitOne(2000))
                 {
+                    // Assert that Event has been raised:
                     Assert.True(eventEmitted);
                     Assert.NotNull(receivedEvent);
+                    // Assert that EventTimestamp has been sent correctly:
                     Assert.Equal(new AmqpTimestamp(sendEvent.Timestamp), receivedEvent.BasicProperties.Timestamp);
-                    Assert.Equal("InfoSupport.WSA.Infrastructure.Test.TestEvent", receivedEvent.BasicProperties.Type);
+                    // Assert that EventID has been sent correctly:
+                    Assert.Equal(sendEvent.ID.ToString(), receivedEvent.BasicProperties.CorrelationId);
+                    // Assert that EventType has been sent correctly:
+                    Assert.Equal("Minor.WSA.Infrastructure.Test.PublisherTestEvent", receivedEvent.BasicProperties.Type);
+                    // Assert that Event Payload has been sent correctly:
+                    string jsonMessage = Encoding.UTF8.GetString(receivedEvent.Body);
+                    Assert.Equal($"{{\"RoutingKey\":\"Minor.WSA.PublisherTestEvent\",\"Timestamp\":{sendEvent.Timestamp},\"ID\":\"{sendEvent.ID}\"}}", jsonMessage);
                 }
                 else
                 {
@@ -67,31 +77,40 @@ public class EventPublisherTest
         }
     }
 
-    //[Fact]
-    //public void DefaultBusoptions()
-    //{
-    //    using (var target = new EventPublisher())
-    //    {
-    //        var result = target.BusOptions;
+    [Fact]
+    public void DefaultBusoptions()
+    {
+        using (var target = new EventPublisher())
+        {
+            var result = target.BusOptions;
 
-    //        Assert.Equal("WSA.DefaultEventBus", result.ExchangeName);
-    //        Assert.Equal(null, result.QueueName);
-    //        Assert.Equal("localhost", result.HostName);
-    //        Assert.Equal(5672, result.Port);
-    //        Assert.Equal("guest", result.UserName);
-    //        Assert.Equal("guest", result.Password);
-    //    }
-    //}
+            Assert.Equal("WSA.DefaultEventBus", result.ExchangeName);
+            Assert.Equal("localhost", result.HostName);
+            Assert.Equal(5672, result.Port);
+            Assert.Equal("guest", result.UserName);
+            Assert.Equal("guest", result.Password);
+        }
+    }
 
-    //[Fact]
-    //public void CustomBusoptions()
-    //{
-    //    var options = new BusOptions { HostName = "127.0.0.1" };
-    //    using (var target = new EventPublisher(options))
-    //    {
-    //        var result = target.BusOptions;
+    [Fact]
+    public void CustomBusoptions()
+    {
+        var options = new BusOptions(hostName: "127.0.0.1");
+        using (var target = new EventPublisher(options))
+        {
+            var result = target.BusOptions;
 
-    //        Assert.Equal("127.0.0.1", result.HostName);
-    //    }
-    //}
+            Assert.Equal("127.0.0.1", result.HostName);
+        }
+    }
+
+    [Fact]
+    public void HostCannotBeReached()
+    {
+        var options = new BusOptions(hostName: "CannotBeReached");
+
+        Action action = () => { var target = new EventPublisher(options); };
+
+        Assert.Throws<MicroserviceConfigurationException>(action);
+    }
 }

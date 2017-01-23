@@ -17,7 +17,7 @@ namespace Minor.WSA.Infrastructure
             BusOptions = options ?? new BusOptions();
         }
 
-        public virtual void Open()
+        public virtual void CreateConnection()
         { 
             var factory = new ConnectionFactory()
             {
@@ -32,7 +32,7 @@ namespace Minor.WSA.Infrastructure
             }
             catch
             {
-//                throw new MicroserviceConfigurationException("The Eventbus (RabbitMQ service) cannot be reached.");
+                throw new MicroserviceConfigurationException("The Eventbus (RabbitMQ service) cannot be reached.");
             }
             Channel = _connection.CreateModel();
 

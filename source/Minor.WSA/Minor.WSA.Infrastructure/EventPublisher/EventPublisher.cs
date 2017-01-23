@@ -20,7 +20,7 @@ namespace Minor.WSA.Infrastructure
         {
             try
             {
-                Open();
+                CreateConnection();
             }
             catch
             {
@@ -37,18 +37,20 @@ namespace Minor.WSA.Infrastructure
         public void Publish(DomainEvent domainEvent)
         {
             PublishRawMessage(
-                timestamp:   domainEvent.Timestamp, 
-                routingKey:  domainEvent.RoutingKey,
-                eventType:   domainEvent.GetType().FullName, 
-                jsonMessage: JsonConvert.SerializeObject(domainEvent)
+                timestamp:     domainEvent.Timestamp, 
+                routingKey:    domainEvent.RoutingKey,
+                correlationId: domainEvent.ID.ToString(),
+                eventType:     domainEvent.GetType().FullName, 
+                jsonMessage:   JsonConvert.SerializeObject(domainEvent)
             );
         }
 
-        private void PublishRawMessage(long timestamp, string routingKey, string eventType, string jsonMessage)
+        private void PublishRawMessage(long timestamp, string routingKey, string correlationId, string eventType, string jsonMessage)
         {
             // set metadata
             var props = Channel.CreateBasicProperties();
             props.Timestamp = new AmqpTimestamp(timestamp);
+            props.CorrelationId = correlationId;
             props.Type = eventType;
             // set payload
             var buffer = Encoding.UTF8.GetBytes(jsonMessage);

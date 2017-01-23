@@ -8,9 +8,17 @@ namespace Minor.WSA.Infrastructure
         {
         }
 
-        public object CreateHost()
+        public MicroserviceHostBuilder UseConventions()
         {
             throw new NotImplementedException();
         }
+
+        public MicroserviceHost CreateHost()
+        {
+            var host = new MicroserviceHost();
+
+            return host;
+        }
+
     }
 }

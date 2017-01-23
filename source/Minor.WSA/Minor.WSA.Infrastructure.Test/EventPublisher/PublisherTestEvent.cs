@@ -1,8 +1,12 @@
 ﻿using Minor.WSA.Common;
 
-internal class PublisherTestEvent : DomainEvent
+namespace Minor.WSA.Infrastructure.Test
 {
-    public PublisherTestEvent() : base("Minor.WSA.PublisherTestEvent")
+
+    internal class PublisherTestEvent : DomainEvent
     {
+        public PublisherTestEvent() : base("Minor.WSA.PublisherTestEvent")
+        {
+        }
     }
 }
