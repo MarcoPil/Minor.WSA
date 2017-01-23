@@ -25,6 +25,11 @@ namespace Minor.WSA.Infrastructure
         /// </summary>
         public string UserName { get; set; }
 
+         /// <summary>
+        /// Default Password: "guest"
+        /// </summary>
+        public string Password { get; set; }
+
         /// <summary>
         /// Makes a copy of the Busoptions, replacing all provided parameters
         /// </summary>
@@ -47,11 +52,6 @@ namespace Minor.WSA.Infrastructure
         }
 
         /// <summary>
-        /// Default Password: "guest"
-        /// </summary>
-        public string Password { get; set; }
-
-        /// <summary>
         /// Initializes with default BusOptions
         /// </summary>
         public BusOptions()
@@ -65,7 +65,7 @@ namespace Minor.WSA.Infrastructure
 
         /// <summary>
         /// Read BusOptions from environment variables:
-        /// eventbus-exchangename, eventbus-queuename, eventbus-hostname, eventbus-port, eventbus-username, eventbus-password
+        /// eventbus-exchangename, eventbus-hostname, eventbus-port, eventbus-username, eventbus-password
         /// </summary>
         /// <returns></returns>
         public static BusOptions CreateFromEnvironment()

@@ -70,6 +70,39 @@ public class BusOptionsTest
     }
 
     [Fact]
+    public void BusoptionsFromEnvironment()
+    {
+        // Arrange
+        string backup1 = Environment.GetEnvironmentVariable("eventbus-exchangename");
+        string backup2 = Environment.GetEnvironmentVariable("eventbus-hostname");
+        string backup3 = Environment.GetEnvironmentVariable("eventbus-port");
+        string backup4 = Environment.GetEnvironmentVariable("eventbus-username");
+        string backup5 = Environment.GetEnvironmentVariable("eventbus-password");
+        Environment.SetEnvironmentVariable("eventbus-exchangename", "envExchangeName");
+        Environment.SetEnvironmentVariable("eventbus-hostname", "envHostName");
+        Environment.SetEnvironmentVariable("eventbus-port", "51422");
+        Environment.SetEnvironmentVariable("eventbus-username", "envUserName");
+        Environment.SetEnvironmentVariable("eventbus-password", "envPassword");
+
+        // Act
+        var result = BusOptions.CreateFromEnvironment();
+
+        // Assert
+        Assert.Equal("envExchangeName", result.ExchangeName);
+        Assert.Equal("envHostName", result.HostName);
+        Assert.Equal(51422, result.Port);
+        Assert.Equal("envUserName", result.UserName);
+        Assert.Equal("envPassword", result.Password);
+
+        // Clean-up
+        Environment.SetEnvironmentVariable("eventbus-exchangename", backup1);
+        Environment.SetEnvironmentVariable("eventbus-hostname", backup2);
+        Environment.SetEnvironmentVariable("eventbus-port", backup3);
+        Environment.SetEnvironmentVariable("eventbus-username", backup4);
+        Environment.SetEnvironmentVariable("eventbus-password", backup5);
+    }
+
+    [Fact]
     public void BusOptionsToString()
     {
         // Arrange
