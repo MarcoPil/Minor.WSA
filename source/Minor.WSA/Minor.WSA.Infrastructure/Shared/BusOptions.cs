@@ -51,11 +51,6 @@ namespace Minor.WSA.Infrastructure
         }
 
         /// <summary>
-        /// Default Password: "guest"
-        /// </summary>
-        public string Password { get; set; }
-
-        /// <summary>
         /// Initializes with default BusOptions
         /// </summary>
         public BusOptions(

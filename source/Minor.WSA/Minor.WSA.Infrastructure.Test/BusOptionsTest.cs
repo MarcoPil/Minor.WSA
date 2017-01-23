@@ -23,6 +23,21 @@ public class BusOptionsTest
     }
 
     [Fact]
+    public void PartiallyDefaultBusoptions()
+    {
+        // Act
+        var result = new BusOptions(exchangeName: "Alternative.Eventbus",
+                                    password: "Gast!");
+
+        // Assert
+        Assert.Equal("Alternative.Eventbus", result.ExchangeName);
+        Assert.Equal("localhost", result.HostName);
+        Assert.Equal(5672, result.Port);
+        Assert.Equal("guest", result.UserName);
+        Assert.Equal("Gast!", result.Password);
+    }
+
+    [Fact]
     public void CopyBusoptions()
     {
         // Arrange

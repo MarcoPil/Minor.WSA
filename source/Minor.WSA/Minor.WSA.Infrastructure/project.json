@@ -1,9 +1,11 @@
-﻿{
-  "version": "1.0.0-*",
+{
+  "version": "1.0.0-alpha1-build1",
 
   "dependencies": {
+    "Minor.WSA.Common": "1.0.0-*",
     "NETStandard.Library": "1.6.0",
-    "Newtonsoft.Json": "9.0.1"
+    "Newtonsoft.Json": "9.0.1",
+    "RabbitMQ.Client": "4.1.1"
   },
 
   "frameworks": {
