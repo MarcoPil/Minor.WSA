@@ -4,7 +4,7 @@ namespace Minor.WSA.Infrastructure.Test.TestApp.Events
 {
     public class KlantVerhuisd : DomainEvent
     {
-        public KlantVerhuisd() : base("")
+        public KlantVerhuisd() : base("Test.WSA.KlantVerhuisd")
         {
         }
     }

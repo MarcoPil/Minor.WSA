@@ -8,6 +8,7 @@ namespace Minor.WSA.Infrastructure.Test.TestApp.EventHandlers
 {
     // [EventHandler(RoutingKey="MVM.Klantbeheer.*")]  
     /// default RoutingKey = "#.Klantbeheer.#"  ("#.<<bla>>.#", want de class heet <bla>>EventHandler)
+    [EventHandler]
     public class KlantbeheerEventHandler
     {
         /// Default RoutingKey = "#.Klantbeheer.KlantGeregistreerd" = "#.NaamEventHander.NaamEvent"
@@ -16,7 +17,7 @@ namespace Minor.WSA.Infrastructure.Test.TestApp.EventHandlers
 
         }
 
-        // [RoutingKey("MVM.Klantbeheer.KlantVerhuisdEvent")]    /// Reageert op "MVM.Klantbeheer.KlantVerhuisdEvent"-event en bindt dit aan KlantVerhuisd-event
+        [RoutingKey("Test.WSA.KlantVerhuisd")]    /// Reageert op "Test.WSA.KlantVerhuisd"-event en bindt dit aan KlantVerhuisd-event
         public void KlantVerhuisd(KlantVerhuisd evt)
         {
 

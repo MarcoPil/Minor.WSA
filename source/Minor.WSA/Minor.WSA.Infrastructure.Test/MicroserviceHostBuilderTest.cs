@@ -17,13 +17,27 @@ public class MicroserviceHostBuilderTest
         Assert.NotNull(result);
     }
 
-    //[Fact]
-    //public void BuilderCreatesHost()
-    //{
-    //    var target = new MicroserviceHostBuilder();
+    [Fact]
+    public void BuilderFindsEventHandlerClasses()
+    {
+        var target = new MicroserviceHostBuilder();
 
-    //    var result = target.UseConventions();
+        var result = target.UseConventions();
 
-    //    Assert.Contains(result.ServiceModel.EventHandlers.Contains(handler => ));
-    //}
+        Assert.Equal(1, result.Factories.Count());
+        Assert.Contains("Minor.WSA.Infrastructure.Test.TestApp.EventHandlers.KlantbeheerEventHandler", result.Factories);
+    }
+
+    [Fact]
+    public void BuilderFindsEventHandlingMethods()
+    {
+        var target = new MicroserviceHostBuilder();
+
+        var result = target.UseConventions();
+
+        Assert.Equal(2, result.EventHandles.Count());
+        Assert.Contains("#.Klantbeheer.KlantGeregistreerd", result.EventHandles);
+        Assert.Contains("Test.WSA.KlantVerhuisd", result.EventHandles);
+    }
+
 }
