@@ -2,7 +2,7 @@
 
 namespace Minor.WSA.Infrastructure
 {
-    public class Factory
+    public class Factory : IFactory
     {
         private Type type;
 
@@ -11,7 +11,7 @@ namespace Minor.WSA.Infrastructure
             this.type = type;
         }
 
-        public virtual object GetInstance()
+        public object GetInstance()
         {
             throw new NotImplementedException();
         }
