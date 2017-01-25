@@ -80,12 +80,13 @@ namespace Minor.WSA.Infrastructure
                             }
                             routingKey = "#." + typeName + "." + paramType.Name;
                         }
-                        _eventHandles.Add(routingKey, new EventDispatcher());
+                        var factory = _factories[type];
+                        _eventHandles.Add(routingKey, new EventDispatcher(factory,method,paramType));
                     }
-                    if (paramType == typeof(Newtonsoft.Json.Linq.JObject))
-                    {
-                        _eventHandles.Add("#", new EventDispatcher());
-                    }
+                    //if (paramType == typeof(Newtonsoft.Json.Linq.JObject))
+                    //{
+                    //    _eventHandles.Add("#", new EventDispatcher(??, method, typeof(object)));
+                    //}
                 }
             }
         }

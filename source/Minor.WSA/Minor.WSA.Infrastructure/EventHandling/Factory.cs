@@ -2,13 +2,18 @@
 
 namespace Minor.WSA.Infrastructure
 {
-    internal class Factory
+    public class Factory
     {
         private Type type;
 
         public Factory(Type type)
         {
             this.type = type;
+        }
+
+        public virtual object GetInstance()
+        {
+            throw new NotImplementedException();
         }
     }
 }
