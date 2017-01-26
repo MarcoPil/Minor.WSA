@@ -39,12 +39,23 @@ namespace Minor.WSA.Infrastructure
 
             foreach (var type in referencingAssemblies.SelectMany(a => a.GetTypes()))
             {
-                if (type.GetTypeInfo().GetCustomAttributes<EventHandlerAttribute>().Any())
-                {
-                    _factories.Add(type, new TransientFactory(_serviceCollection, type));
-                    CreateEventDispatchers(type);
-                }
+                FindEventHandlers(type);
             }
+        }
+
+        private void FindEventHandlers(Type type)
+        {
+            if (type.GetTypeInfo().GetCustomAttributes<EventHandlerAttribute>().Any())
+            {
+                _factories.Add(type, new TransientFactory(_serviceCollection, type));
+                CreateEventDispatchers(type);
+            }
+        }
+
+        public MicroserviceHostBuilder AddEventHandler<T>()
+        {
+            FindEventHandlers(typeof(T));
+            return this;
         }
 
         private IEnumerable<Assembly> GetRefencingAssemblies(Assembly assembly)
