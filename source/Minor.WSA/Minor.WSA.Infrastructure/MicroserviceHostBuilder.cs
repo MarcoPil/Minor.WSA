@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyModel;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyModel;
 using Minor.WSA.Common;
 using System;
 using System.Collections;
@@ -11,7 +12,8 @@ namespace Minor.WSA.Infrastructure
 {
     public class MicroserviceHostBuilder
     {
-        private Dictionary<Type, Factory> _factories;
+        private IServiceCollection _serviceCollection;
+        private Dictionary<Type, IFactory> _factories;
         private Dictionary<string, EventDispatcher> _eventHandles;
 
         public IEnumerable<string> Factories => _factories.Keys.Select(t => t.ToString());
@@ -19,7 +21,8 @@ namespace Minor.WSA.Infrastructure
 
         public MicroserviceHostBuilder()
         {
-            _factories = new Dictionary<Type, Factory>();
+            _serviceCollection = new ServiceCollection();
+            _factories = new Dictionary<Type, IFactory>();
             _eventHandles = new Dictionary<string, EventDispatcher>();
         }
 
@@ -38,7 +41,7 @@ namespace Minor.WSA.Infrastructure
             {
                 if (type.GetTypeInfo().GetCustomAttributes<EventHandlerAttribute>().Any())
                 {
-                    _factories.Add(type, new Factory(type));
+                    _factories.Add(type, new TransientFactory(_serviceCollection, type));
                     CreateEventDispatchers(type);
                 }
             }
