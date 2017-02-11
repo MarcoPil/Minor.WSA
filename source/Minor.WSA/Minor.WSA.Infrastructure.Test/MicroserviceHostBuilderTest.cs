@@ -29,6 +29,20 @@ public class MicroserviceHostBuilderTest
         Assert.Contains("Minor.WSA.Infrastructure.Test.TestApp.EventHandlers.KlantbeheerEventHandler", result.Factories);
     }
 
+
+    [Fact]
+    public void BuilderRegistersQueueNames()
+    {
+        var target = new MicroserviceHostBuilder();
+
+        var result = target.UseConventions();
+
+        Assert.Equal(2, result.EventListeners.Count());
+        Assert.True(result.EventListeners.Any(listener => listener.QueueName == "MVM.Polisbeheer.KlantbeheerEvents"));
+        Assert.True(result.EventListeners.Any(listener => listener.QueueName == "Unittest.WSA.Test"));
+
+    }
+
     [Fact]
     public void BuilderFindsEventHandlingMethods()
     {
@@ -36,9 +50,10 @@ public class MicroserviceHostBuilderTest
 
         var result = target.UseConventions();
 
-        Assert.Equal(4, result.EventHandles.Count());
-        Assert.Contains("#.Klantbeheer.KlantGeregistreerd", result.EventHandles);
-        Assert.Contains("Test.WSA.KlantVerhuisd", result.EventHandles);
+        var handles = result.EventListeners.SelectMany(listener => listener.RoutingKeyExpressions);
+        Assert.Equal(4, handles.Count());
+        Assert.Contains("#.Klantbeheer.KlantGeregistreerd", handles);
+        Assert.Contains("Test.WSA.KlantVerhuisd", handles);
     }
 
     [Fact]
@@ -50,9 +65,10 @@ public class MicroserviceHostBuilderTest
 
         Assert.Equal(1, result.Factories.Count());
         Assert.Contains("Minor.WSA.Infrastructure.Test.AnotherEventHandler", result.Factories);
-        Assert.Equal(2, result.EventHandles.Count());
-        Assert.Contains("#.Another.SomeEvent", result.EventHandles);
-        Assert.Contains("WSA.Test.OtherEvent", result.EventHandles);
+        var routingkeys = result.EventListeners.First().RoutingKeyExpressions;
+        Assert.Equal(2, routingkeys.Count());
+        Assert.Contains("#.Another.SomeEvent", routingkeys);
+        Assert.Contains("WSA.Test.OtherEvent", routingkeys);
     }
 
 }

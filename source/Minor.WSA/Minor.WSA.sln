@@ -9,6 +9,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Minor.WSA.Infrastructure", 
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Minor.WSA.Infrastructure.Test", "Minor.WSA.Infrastructure.Test\Minor.WSA.Infrastructure.Test.xproj", "{BB40043C-BFD5-479B-9E33-C9878A78912B}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Minor.WSA.Infrastructure.TestProject", "Minor.WSA.Infrastructure.TestProject\Minor.WSA.Infrastructure.TestProject.xproj", "{94D9199D-2D32-443E-B68A-BF5F8115C17A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{BB40043C-BFD5-479B-9E33-C9878A78912B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB40043C-BFD5-479B-9E33-C9878A78912B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB40043C-BFD5-479B-9E33-C9878A78912B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94D9199D-2D32-443E-B68A-BF5F8115C17A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94D9199D-2D32-443E-B68A-BF5F8115C17A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94D9199D-2D32-443E-B68A-BF5F8115C17A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94D9199D-2D32-443E-B68A-BF5F8115C17A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

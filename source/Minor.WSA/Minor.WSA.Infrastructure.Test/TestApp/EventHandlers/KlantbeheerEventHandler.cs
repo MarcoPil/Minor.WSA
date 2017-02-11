@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace Minor.WSA.Infrastructure.Test.TestApp.EventHandlers
 {
-    // [EventHandler(RoutingKey="MVM.Klantbeheer.*")]  
-    /// default RoutingKey = "#.Klantbeheer.#"  ("#.<<bla>>.#", want de class heet <bla>>EventHandler)
-    [EventHandler]
+    [EventHandler("MVM.Polisbeheer.KlantbeheerEvents")]
     public class KlantbeheerEventHandler
     {
         /// Default RoutingKey = "#.Klantbeheer.KlantGeregistreerd" = "#.NaamEventHander.NaamEvent"

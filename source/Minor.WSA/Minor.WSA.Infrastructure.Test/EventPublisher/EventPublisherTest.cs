@@ -16,8 +16,9 @@ public class EventPublisherTest
     [Fact]
     public void PublishEmitsEventOnExhange()
     {
+        var busOptions = new BusOptions(exchangeName: "TestEventbus");
         // Arrange (set the stage)
-        var factory = new ConnectionFactory();
+        var factory = RabbitTestHelp.CreateFactoryFrom(busOptions);
         using (var connection = factory.CreateConnection())
         using (var channel = connection.CreateModel())
         {
@@ -45,8 +46,7 @@ public class EventPublisherTest
                                  consumer: consumer);
 
             // Arrange
-            var options = new BusOptions(exchangeName: "TestEventbus");
-            using (IEventPublisher target = new EventPublisher(options))
+            using (IEventPublisher target = new EventPublisher(busOptions))
             {
                 DomainEvent sendEvent = new PublisherTestEvent();
 
@@ -75,6 +75,8 @@ public class EventPublisherTest
                 }
             }
         }
+        RabbitTestHelp.DeleteExchange(busOptions);
+
     }
 
     [Fact]
@@ -90,18 +92,20 @@ public class EventPublisherTest
             Assert.Equal("guest", result.UserName);
             Assert.Equal("guest", result.Password);
         }
+        RabbitTestHelp.DeleteExchange(new BusOptions());
     }
 
     [Fact]
     public void CustomBusoptions()
     {
-        var options = new BusOptions(hostName: "127.0.0.1");
-        using (var target = new EventPublisher(options))
+        var busOptions = new BusOptions(hostName: "127.0.0.1");
+        using (var target = new EventPublisher(busOptions))
         {
             var result = target.BusOptions;
 
             Assert.Equal("127.0.0.1", result.HostName);
         }
+        RabbitTestHelp.DeleteExchange(busOptions);
     }
 
     [Fact]

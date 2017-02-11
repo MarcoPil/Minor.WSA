@@ -14,21 +14,27 @@ namespace Minor.WSA.Infrastructure
     {
         private IServiceCollection _serviceCollection;
         private Dictionary<Type, IFactory> _factories;
-        private Dictionary<string, EventDispatcher> _eventHandles;
+        private List<EventListener> _eventListeners;
 
         public IEnumerable<string> Factories => _factories.Keys.Select(t => t.ToString());
-        public IEnumerable<string> EventHandles => _eventHandles.Keys;
+        public IEnumerable<EventListener> EventListeners => _eventListeners;
 
         public MicroserviceHostBuilder()
         {
             _serviceCollection = new ServiceCollection();
             _factories = new Dictionary<Type, IFactory>();
-            _eventHandles = new Dictionary<string, EventDispatcher>();
+            _eventListeners = new List<EventListener>();
         }
 
         public MicroserviceHostBuilder UseConventions()
         {
             FindEventHandlers();
+            return this;
+        }
+
+        public MicroserviceHostBuilder AddEventHandler<T>()
+        {
+            FindEventHandlers(typeof(T));
             return this;
         }
 
@@ -45,17 +51,13 @@ namespace Minor.WSA.Infrastructure
 
         private void FindEventHandlers(Type type)
         {
-            if (type.GetTypeInfo().GetCustomAttributes<EventHandlerAttribute>().Any())
+            var eventHandlerAttr = type.GetTypeInfo().GetCustomAttribute<EventHandlerAttribute>();
+            if (eventHandlerAttr != null)
             {
-                _factories.Add(type, new TransientFactory(_serviceCollection, type));
-                CreateEventDispatchers(type);
+                var factory = new TransientFactory(_serviceCollection, type);
+                _factories.Add(type, factory);
+                _eventListeners.Add(CreateEventListener(type, eventHandlerAttr.QueueName, factory));
             }
-        }
-
-        public MicroserviceHostBuilder AddEventHandler<T>()
-        {
-            FindEventHandlers(typeof(T));
-            return this;
         }
 
         private IEnumerable<Assembly> GetRefencingAssemblies(Assembly assembly)
@@ -67,8 +69,10 @@ namespace Minor.WSA.Infrastructure
                    select Assembly.Load(new AssemblyName(library.Name));
         }
 
-        private void CreateEventDispatchers(Type type)
+        private EventListener CreateEventListener(Type type, string queueName, IFactory factory)
         {
+            var eventHandles = new Dictionary<string, EventDispatcher>();
+
             var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
@@ -94,8 +98,7 @@ namespace Minor.WSA.Infrastructure
                             }
                             routingKey = "#." + typeName + "." + paramType.Name;
                         }
-                        var factory = _factories[type];
-                        _eventHandles.Add(routingKey, new EventDispatcher(factory,method,paramType));
+                        eventHandles.Add(routingKey, new EventDispatcher(factory, method, paramType));
                     }
                     //if (paramType == typeof(Newtonsoft.Json.Linq.JObject))
                     //{
@@ -103,11 +106,12 @@ namespace Minor.WSA.Infrastructure
                     //}
                 }
             }
+            return new EventListener(queueName, eventHandles);
         }
 
         public MicroserviceHost CreateHost()
         {
-            var host = new MicroserviceHost();
+            var host = new MicroserviceHost(EventListeners);
 
             return host;
         }
