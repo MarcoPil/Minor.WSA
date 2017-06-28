@@ -19,44 +19,6 @@ public class MicroserviceHostBuilderTest
     }
 
     [Fact]
-    public void BuilderFindsEventHandlerClasses()
-    {
-        var target = new MicroserviceHostBuilder();
-
-        var result = target.UseConventions();
-
-        Assert.Equal(2, result.Factories.Count());
-        Assert.Contains("Minor.WSA.Infrastructure.Test.TestApp.EventHandlers.KlantbeheerEventHandler", result.Factories);
-    }
-
-
-    [Fact]
-    public void BuilderRegistersQueueNames()
-    {
-        var target = new MicroserviceHostBuilder();
-
-        var result = target.UseConventions();
-
-        Assert.Equal(2, result.EventListeners.Count());
-        Assert.True(result.EventListeners.Any(listener => listener.QueueName == "MVM.Polisbeheer.KlantbeheerEvents"));
-        Assert.True(result.EventListeners.Any(listener => listener.QueueName == "Unittest.WSA.Test"));
-
-    }
-
-    [Fact]
-    public void BuilderFindsEventHandlingMethods()
-    {
-        var target = new MicroserviceHostBuilder();
-
-        var result = target.UseConventions();
-
-        var handles = result.EventListeners.SelectMany(listener => listener.RoutingKeyExpressions);
-        Assert.Equal(4, handles.Count());
-        Assert.Contains("#.Klantbeheer.KlantGeregistreerd", handles);
-        Assert.Contains("Test.WSA.KlantVerhuisd", handles);
-    }
-
-    [Fact]
     public void BuilderAddEventHandler()
     {
         var target = new MicroserviceHostBuilder();
@@ -69,6 +31,21 @@ public class MicroserviceHostBuilderTest
         Assert.Equal(2, routingkeys.Count());
         Assert.Contains("#.Another.SomeEvent", routingkeys);
         Assert.Contains("WSA.Test.OtherEvent", routingkeys);
+    }
+
+
+    [Fact]
+    public void IncorrectRoutingkey()
+    {
+        var target = new MicroserviceHostBuilder();
+
+        Action action = () =>
+        {
+            MicroserviceHostBuilder result = target.AddEventHandler<IncorrectRoutingKeyEventHandler>();
+        };
+
+        var ex = Assert.Throws<MicroserviceConfigurationException>(action);
+        Assert.Equal("Routingkey Expression '#OtherEvent' has an invalid expression format.", ex.Message);
     }
 
 }

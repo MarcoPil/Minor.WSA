@@ -87,6 +87,10 @@ namespace Minor.WSA.Infrastructure
                         if (routingKeyAttr != null)
                         {
                             routingKey = routingKeyAttr.RoutingKey;
+                            if (!RoutingKeyMatcher.IsValidRoutingKeyExpression(routingKey))
+                            {
+                                throw new MicroserviceConfigurationException($"Routingkey Expression '{routingKey}' has an invalid expression format.");
+                            }
                         }
                         else
                         {
