@@ -8,10 +8,12 @@ namespace Minor.WSA.Infrastructure.Test.EventHandlerTests
     public class DispatcherTestMock
     {
         public DispatchTestEvent EventReceived = null;
+        public int ReceiveCount = 0;
 
         public void HandleDispatchTestEvent(DispatchTestEvent evt)
         {
             EventReceived = evt;
+            ReceiveCount++;
         }
 
     }

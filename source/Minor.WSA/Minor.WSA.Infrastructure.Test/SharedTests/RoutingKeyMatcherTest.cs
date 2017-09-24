@@ -59,6 +59,20 @@ public class RoutingKeyMatcherTest
         Assert.False(RoutingKeyMatcher.IsValidRoutingKeyExpression("MVM.#Event"), "MVM.#Event");
         Assert.False(RoutingKeyMatcher.IsValidRoutingKeyExpression("MVM.*Event"), "MVM.*Event");
         Assert.False(RoutingKeyMatcher.IsValidRoutingKeyExpression("MVM.*#"), "MVM.*#");
+    }
 
+    [Fact]
+    public void MatchShouldFindMultipleRoutingKeyExpressions()
+    {
+        // Arrange
+        string[] routingKeyExpressions = { "MVM.*.Event", "*.Test.Event" };
+        string routingKey = "MVM.Test.Event";
+
+        // Act
+        //IEnumerable<string> matchingExpressions = RoutingKeyMatcher.Match(routingKey, routingKeyExpressions);
+
+        //// Assert
+        //Assert.Contains("MVM.*.Event",  matchingExpressions);
+        //Assert.Contains("*.Test.Event", matchingExpressions);
     }
 }

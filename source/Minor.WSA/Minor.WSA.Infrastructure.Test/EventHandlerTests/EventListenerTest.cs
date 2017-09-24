@@ -138,4 +138,44 @@ public class EventListenerTest
         RabbitTestHelp.DeleteExchange(busOptions);
     }
 
+    [Fact]
+    public void EventIsHandledByMultipleHandlingMethods()
+    {
+        // Arrange
+        var testHandler = new DispatcherTestMock();
+        var factoryMock = new Mock<IFactory>();
+        factoryMock.Setup(fm => fm.GetInstance()).Returns(testHandler);
+
+        var factory = factoryMock.Object;
+        var method = typeof(DispatcherTestMock).GetMethod("HandleDispatchTestEvent");
+        var paramType = typeof(DispatchTestEvent);
+
+        var dispatchers = new Dictionary<string, EventDispatcher>();
+        dispatchers.Add("*.Test.DispatchTest", new EventDispatcher(factory, method, paramType));
+        dispatchers.Add("MVM.*.DispatchTest", new EventDispatcher(factory, method, paramType));
+
+        var busOptions = new BusOptions(exchangeName: "EventListenerTest_Ex04");
+        using (var connection = RabbitTestHelp.CreateFactoryFrom(busOptions).CreateConnection())
+        using (var channel = connection.CreateModel())
+        {
+            channel.ExchangeDeclare("EventListenerTest_Ex04", ExchangeType.Topic, durable: false, autoDelete: false);
+
+            var target = new EventListener("EventListenerTest_Q04", dispatchers);
+            target.OpenEventQueue(channel, "EventListenerTest_Ex04");
+            target.StartProcessing();
+
+            var evt = new DispatchTestEvent { Number = 7 };
+            using (var publisher = new EventPublisher(busOptions))
+            {
+                // Act - 
+                publisher.Publish(evt); // publish the event once
+            }
+
+            // Assert
+            Thread.Sleep(100);
+            Assert.Equal(2, testHandler.ReceiveCount); // receive the event twice
+        }
+
+        RabbitTestHelp.DeleteExchange(busOptions);
+    }
 }

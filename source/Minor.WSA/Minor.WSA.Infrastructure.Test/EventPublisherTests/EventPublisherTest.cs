@@ -42,7 +42,7 @@ public class EventPublisherTest
             };
 
             channel.BasicConsume(queue: listenQueueName,
-                                 noAck: true,
+                                 autoAck: false,
                                  consumer: consumer);
 
             // Arrange

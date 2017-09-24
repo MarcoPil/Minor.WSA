@@ -66,8 +66,8 @@ namespace Minor.WSA.Infrastructure
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += EventReceived;
             _channel.BasicConsume(queue: QueueName,
-                                 noAck: false,
-                                 consumer: consumer);
+                                  autoAck: true,
+                                  consumer: consumer);
         }
 
         protected virtual void EventReceived(object sender, BasicDeliverEventArgs e)

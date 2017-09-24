@@ -10,7 +10,6 @@ namespace Minor.WSA.Infrastructure
     /// </summary>
     public class RoutingKeyMatcher
     {
-
         public static string Match(string routingKey, IEnumerable<string> routingKeyExpressions)
         {
             return routingKeyExpressions.First(expr => IsMatch(expr, routingKey));
