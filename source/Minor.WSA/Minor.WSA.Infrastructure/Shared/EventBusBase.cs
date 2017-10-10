@@ -17,7 +17,7 @@ namespace Minor.WSA.Infrastructure
             BusOptions = options ?? new BusOptions();
         }
 
-        public virtual void CreateConnection()
+        protected virtual void CreateConnection()
         { 
             var factory = new ConnectionFactory()
             {

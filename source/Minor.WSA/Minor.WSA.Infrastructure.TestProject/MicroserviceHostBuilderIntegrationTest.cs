@@ -27,7 +27,7 @@ public class MicroserviceHostBuilderIntegrationTest
         var result = target.UseConventions();
 
         Assert.Equal(1, result.EventListeners.Count());
-        Assert.True(result.EventListeners.Any(listener => listener.QueueName == "MVM.Polisbeheer.KlantbeheerEvents"));
+        Assert.Contains(result.EventListeners, listener => listener.QueueName == "MVM.Polisbeheer.KlantbeheerEvents");
     }
 
     [Fact]

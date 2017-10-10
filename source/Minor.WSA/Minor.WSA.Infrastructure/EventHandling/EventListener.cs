@@ -74,12 +74,15 @@ namespace Minor.WSA.Infrastructure
         {
             try
             {
-                var matchingKey = RoutingKeyMatcher.Match(e.RoutingKey, RoutingKeyExpressions);
-                var dispatcher = _dispatchers[matchingKey];
+                var matchingKeys = RoutingKeyMatcher.Match(e.RoutingKey, RoutingKeyExpressions);
                 var jsonMessage = Encoding.UTF8.GetString(e.Body);  // fetch payload
 
                 // process event
-                dispatcher.DispatchEvent(jsonMessage);
+                foreach (string matchingKey in matchingKeys)
+                {
+                    var dispatcher = _dispatchers[matchingKey];
+                    dispatcher.DispatchEvent(jsonMessage);
+                }
 
                 // send acknowledgement
                 _channel.BasicAck(e.DeliveryTag, false);

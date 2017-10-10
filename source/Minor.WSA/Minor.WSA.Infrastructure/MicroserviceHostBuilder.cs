@@ -15,27 +15,36 @@ namespace Minor.WSA.Infrastructure
         private IServiceCollection _serviceCollection;
         private Dictionary<Type, IFactory> _factories;
         private List<EventListener> _eventListeners;
+        private BusOptions _busOptions;
 
         public IEnumerable<string> Factories => _factories.Keys.Select(t => t.ToString());
         public IEnumerable<EventListener> EventListeners => _eventListeners;
+        public IServiceCollection ServiceProvider => _serviceCollection;
 
         public MicroserviceHostBuilder()
         {
             _serviceCollection = new ServiceCollection();
             _factories = new Dictionary<Type, IFactory>();
             _eventListeners = new List<EventListener>();
+            _busOptions = default(BusOptions);
+        }
+
+        public MicroserviceHostBuilder WithBusOptions(BusOptions options)
+        {
+            _busOptions = options;
+            return this;        // for call chaining
         }
 
         public MicroserviceHostBuilder UseConventions()
         {
             FindEventHandlers();
-            return this;
+            return this;        // for call chaining
         }
 
         public MicroserviceHostBuilder AddEventHandler<T>()
         {
             FindEventHandlers(typeof(T));
-            return this;
+            return this;        // for call chaining
         }
 
         private void FindEventHandlers()
@@ -115,7 +124,7 @@ namespace Minor.WSA.Infrastructure
 
         public MicroserviceHost CreateHost()
         {
-            var host = new MicroserviceHost(EventListeners);
+            var host = new MicroserviceHost(EventListeners, _busOptions);
 
             return host;
         }

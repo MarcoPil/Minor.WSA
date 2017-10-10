@@ -16,6 +16,11 @@ namespace Minor.WSA.Infrastructure
             EventListeners = eventListeners;
         }
 
+        /// <summary>
+        /// Declares an Exchange (as configured in the BusOptions). For each EventHander that is configured for this host, a queue (as configured in the EventHandlerAttribute) is opened and bound to this exchange. 
+        /// From this moment in time, all relevant events are captured in the queue(s). 
+        /// The event are only processed after the .Start() method has been called.
+        /// </summary>
         public void Open()
         {
             base.CreateConnection();
@@ -26,6 +31,9 @@ namespace Minor.WSA.Infrastructure
             }
         }
 
+        /// <summary>
+        /// Start processing the events that have arrived in the opened queues.
+        /// </summary>
         public void Start()
         {
             foreach (var listener in EventListeners)
