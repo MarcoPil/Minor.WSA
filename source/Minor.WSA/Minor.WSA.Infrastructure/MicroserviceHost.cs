@@ -27,7 +27,7 @@ namespace Minor.WSA.Infrastructure
 
             foreach (var listener in EventListeners)
             {
-                listener.OpenEventQueue(Channel, BusOptions.ExchangeName);
+                listener.OpenEventQueue(BusOptions);
             }
         }
 

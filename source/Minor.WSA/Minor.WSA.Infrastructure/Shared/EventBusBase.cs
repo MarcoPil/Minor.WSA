@@ -8,8 +8,6 @@ namespace Minor.WSA.Infrastructure
 {
     public abstract class EventBusBase : IDisposable
     {
-        private IConnection _connection;
-        protected IModel Channel;
         public BusOptions BusOptions { get; }
 
         public EventBusBase(BusOptions options = default(BusOptions))
@@ -18,33 +16,14 @@ namespace Minor.WSA.Infrastructure
         }
 
         protected virtual void CreateConnection()
-        { 
-            var factory = new ConnectionFactory()
-            {
-                HostName = BusOptions.HostName,
-                Port =     BusOptions.Port,
-                UserName = BusOptions.UserName,
-                Password = BusOptions.Password,
-            };
-            try
-            {
-                _connection = factory.CreateConnection();
-            }
-            catch
-            {
-                throw new MicroserviceConfigurationException("The Eventbus (RabbitMQ service) cannot be reached.");
-            }
-            Channel = _connection.CreateModel();
-
-            Channel.ExchangeDeclare(exchange: BusOptions.ExchangeName,
-                                    type: ExchangeType.Topic,
-                                    durable: false, autoDelete: false, arguments: null);
+        {
+            BusOptions.Provider.CreateConnection();
         }
+
 
         public virtual void Dispose()
         {
-            Channel?.Dispose();
-            _connection?.Dispose();
+            BusOptions.Provider.Dispose();
         }
     }
 }

@@ -42,8 +42,8 @@ public class MicroserviceHostTest
             target.Open();
 
             // Assert
-            mock1.Verify(el => el.OpenEventQueue(It.IsAny<IModel>(), "MicroserviceHostTest01"), Times.Once);
-            mock2.Verify(el => el.OpenEventQueue(It.IsAny<IModel>(), "MicroserviceHostTest01"), Times.Once);
+            mock1.Verify(el => el.OpenEventQueue(It.IsAny<BusOptions>()), Times.Once);
+            mock2.Verify(el => el.OpenEventQueue(It.IsAny<BusOptions>()), Times.Once);
         }
 
         RabbitTestHelp.DeleteExchange(busOptions);

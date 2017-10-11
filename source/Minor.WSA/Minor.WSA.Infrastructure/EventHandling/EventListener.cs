@@ -17,7 +17,7 @@ namespace Minor.WSA.Infrastructure
     public class EventListener : IEventListener
     {
         private Dictionary<string, EventDispatcher> _dispatchers; //    string = routingkey-expression
-        private IModel _channel;
+        private BusOptions _busOptions;
 
         public string QueueName { get; }
         public IEnumerable<string> RoutingKeyExpressions => _dispatchers.Keys;
@@ -34,25 +34,11 @@ namespace Minor.WSA.Infrastructure
         /// </summary>
         /// <param name="channel">An opened channel that represents a connection to an rabbitMQ service</param>
         /// <param name="exchangeName">The name of the topic-exchange to which the queue (QueueName) is bound - possibly multiple times, each time with a different routing key expression.</param>
-        public virtual void OpenEventQueue(IModel channel, string exchangeName)
+        public virtual void OpenEventQueue(BusOptions busOptions)
         {
-            _channel = channel;
-            // declare queue
-            // should be NO-auto delete queue,  (queue must survive the listener-process, so that no event gets lost.
-            channel.QueueDeclare(queue: QueueName,
-                                 durable: false,
-                                 exclusive: false,
-                                 autoDelete: false,
-                                 arguments: null);
+            _busOptions = busOptions;
 
-            // do queue-bind for all routingkey expressions
-            foreach (var routingKeyExpr in RoutingKeyExpressions)
-            {
-                channel.QueueBind(queue: QueueName,
-                                  exchange: exchangeName,
-                                  routingKey: routingKeyExpr,
-                                  arguments: null);
-            }
+            busOptions.Provider.CreateQueueWithKeys(QueueName, RoutingKeyExpressions);
 
             // (from this moment in time, all relevant events are captured in the queue, for later processing)
         }
@@ -62,36 +48,25 @@ namespace Minor.WSA.Infrastructure
         /// </summary>
         public virtual void StartProcessing()
         {
-            // register a BasicComsume WITH acknoledgement (only events that have been processed me be removed)
-            var consumer = new EventingBasicConsumer(_channel);
-            consumer.Received += EventReceived;
-            _channel.BasicConsume(queue: QueueName,
-                                  autoAck: true,
-                                  consumer: consumer);
+            _busOptions.Provider.StartReceiving(QueueName, EventReceived);
         }
 
-        protected virtual void EventReceived(object sender, BasicDeliverEventArgs e)
+        protected virtual void EventReceived(EventReceivedArgs args)
         {
-            try
-            {
-                var matchingKeys = RoutingKeyMatcher.Match(e.RoutingKey, RoutingKeyExpressions);
-                var jsonMessage = Encoding.UTF8.GetString(e.Body);  // fetch payload
+            var matchingKeys = RoutingKeyMatcher.Match(args.RoutingKey, RoutingKeyExpressions);
 
-                // process event
-                foreach (string matchingKey in matchingKeys)
-                {
-                    var dispatcher = _dispatchers[matchingKey];
-                    dispatcher.DispatchEvent(jsonMessage);
-                }
-
-                // send acknowledgement
-                _channel.BasicAck(e.DeliveryTag, false);
-            }
-            catch
+            foreach (string matchingKey in matchingKeys)
             {
-                // Fail silently...
-                // but if something goes wrong in dispatching the event, then no acknoledgement is sent.
+                var dispatcher = _dispatchers[matchingKey];
+                dispatcher.DispatchEvent(args.Json);
             }
         }
+    }
+
+    public delegate void EventReceivedCallback(EventReceivedArgs args);
+    public class EventReceivedArgs : EventArgs
+    {
+        public string RoutingKey { get; set; }
+        public string Json { get; set; }
     }
 }

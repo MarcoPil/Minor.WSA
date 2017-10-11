@@ -28,6 +28,11 @@ namespace Minor.WSA.Infrastructure
         /// Default Password: "guest"
         /// </summary>
         public string Password { get; private set; }
+        /// <summary>
+        /// EventBus Provider. Each Event Bus (RabbitMq, Kafka, TestBus) should have its own BusProvider
+        /// </summary>
+        [JsonIgnore]
+        public BusProvider Provider { get; private set; }
 
         /// <summary>
         /// Makes a copy of the Busoptions, replacing all provided parameters
@@ -65,6 +70,7 @@ namespace Minor.WSA.Infrastructure
             Port = port;
             UserName = userName;
             Password = password;
+            Provider = new BusProvider(this);
         }
 
         /// <summary>

@@ -36,29 +36,13 @@ namespace Minor.WSA.Infrastructure
         /// <param name="domainEvent">The domain event to be published. </param>
         public void Publish(DomainEvent domainEvent)
         {
-            PublishRawMessage(
+            BusOptions.Provider.PublishRawMessage(
                 timestamp:     domainEvent.Timestamp, 
                 routingKey:    domainEvent.RoutingKey,
                 correlationId: domainEvent.ID.ToString(),
                 eventType:     domainEvent.GetType().FullName, 
                 jsonMessage:   JsonConvert.SerializeObject(domainEvent)
             );
-        }
-
-        private void PublishRawMessage(long timestamp, string routingKey, string correlationId, string eventType, string jsonMessage)
-        {
-            // set metadata
-            var props = Channel.CreateBasicProperties();
-            props.Timestamp = new AmqpTimestamp(timestamp);
-            props.CorrelationId = correlationId;
-            props.Type = eventType;
-            // set payload
-            var buffer = Encoding.UTF8.GetBytes(jsonMessage);
-            // publish event
-            Channel.BasicPublish(exchange: BusOptions.ExchangeName,
-                                     routingKey: routingKey,
-                                     basicProperties: props,
-                                     body: buffer);
         }
     }
 }
