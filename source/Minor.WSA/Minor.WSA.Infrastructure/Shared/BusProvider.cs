@@ -6,7 +6,7 @@ using RabbitMQ.Client.Events;
 
 namespace Minor.WSA.Infrastructure
 {
-    public class BusProvider
+    public class BusProvider : IDisposable
     {
         private IConnection _connection;
         protected IModel Channel;
