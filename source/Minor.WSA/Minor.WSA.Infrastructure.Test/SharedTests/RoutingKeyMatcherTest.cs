@@ -69,7 +69,7 @@ public class RoutingKeyMatcherTest
         string routingKey = "MVM.Test.Event";
 
         // Act
-        IEnumerable<string> matchingExpressions = RoutingKeyMatcher.Match(routingKey, routingKeyExpressions);
+        IEnumerable<string> matchingExpressions = RoutingKeyMatcher.ThatMatch(routingKeyExpressions, routingKey);
 
         // Assert
         Assert.Contains("MVM.*.Event", matchingExpressions);

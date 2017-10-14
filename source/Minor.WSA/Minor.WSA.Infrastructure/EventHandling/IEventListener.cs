@@ -9,6 +9,6 @@ namespace Minor.WSA.Infrastructure
         IEnumerable<string> TopicExpressions { get; }
 
         void OpenEventQueue(BusOptions busOptions);
-        void StartProcessing();
+        void StartHandling();
     }
 }

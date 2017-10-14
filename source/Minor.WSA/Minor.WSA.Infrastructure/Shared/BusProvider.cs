@@ -86,11 +86,17 @@ namespace Minor.WSA.Infrastructure
             {
                 try
                 {
-                    callback(new EventReceivedArgs
-                    {
-                        Json = Encoding.UTF8.GetString(e.Body),      // fetch payload
-                        RoutingKey = e.RoutingKey
-                    }); //process event
+                    var props = e.BasicProperties;
+
+                    var eventMessage = new EventMessage(
+                        timestamp: props.Timestamp.UnixTime, 
+                        routingKey: e.RoutingKey,
+                        correlationId: props.CorrelationId,
+                        eventType: props.Type,
+                        jsonMessage: Encoding.UTF8.GetString(e.Body)    // fetch payload
+                    );
+
+                    callback(eventMessage); //process event
 
                     Channel.BasicAck(e.DeliveryTag, false);     // send acknowledgement
                 }

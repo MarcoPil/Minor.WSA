@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 namespace Minor.WSA.Infrastructure
 {
     /// <summary>
-    /// For each EventHandler class (marked with the [EventHandler(queueName)]-attribute) and EventListener is created.
+    /// For each event listening class (marked with the [EventListener(queueName)]-attribute) and EventListener is created.
     /// This Eventlistener is responsible for receiving all events that arrive at this particular queue. Therefore 
     /// there can be no two EventListeners that listen to the same queue
     /// </summary>
     public class EventListener : IEventListener
     {
-        private Dictionary<string, EventDispatcher> _dispatchers; //    string = routingkey-expression
+        private Dictionary<string, EventDispatcher> _dispatchers; //    string = topic-expression
         private BusOptions _busOptions;
 
         public string QueueName { get; }
@@ -30,10 +30,9 @@ namespace Minor.WSA.Infrastructure
 
         /// <summary>
         /// Open a named queue (QueueName), so that the same queue can be reused when an off-line application come back on-line,
-        /// and bind it to the exchange over ALL registered routing key expressions (RoutingKeyExpressions).
+        /// and bind it to the exchange over ALL registered topic expressions (TopicExpressions).
         /// </summary>
-        /// <param name="channel">An opened channel that represents a connection to an rabbitMQ service</param>
-        /// <param name="exchangeName">The name of the topic-exchange to which the queue (QueueName) is bound - possibly multiple times, each time with a different routing key expression.</param>
+        /// <param name="busOptions">The busOptions, which includes the BusProvider</param>
         public virtual void OpenEventQueue(BusOptions busOptions)
         {
             _busOptions = busOptions;
@@ -44,21 +43,21 @@ namespace Minor.WSA.Infrastructure
         }
 
         /// <summary>
-        /// Start listening to events
+        /// Start handling events, i.e. start popping events from the queue and process them
         /// </summary>
-        public virtual void StartProcessing()
+        public virtual void StartHandling()
         {
             _busOptions.Provider.StartReceiving(QueueName, EventReceived);
         }
 
-        protected virtual void EventReceived(EventReceivedArgs args)
+        protected virtual void EventReceived(EventMessage eventMessage)
         {
-            var matchingKeys = RoutingKeyMatcher.Match(args.RoutingKey, TopicExpressions);
+            var matchingKeys = TopicExpressions.ThatMatch(eventMessage.RoutingKey);
 
             foreach (string matchingKey in matchingKeys)
             {
                 var dispatcher = _dispatchers[matchingKey];
-                dispatcher.DispatchEvent(args.Json);
+                dispatcher.DispatchEvent(eventMessage.JsonMessage);
             }
         }
     }

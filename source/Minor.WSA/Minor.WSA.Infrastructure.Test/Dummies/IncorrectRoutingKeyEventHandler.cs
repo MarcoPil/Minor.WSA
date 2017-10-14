@@ -1,7 +1,7 @@
 ﻿
 namespace Minor.WSA.Infrastructure.Test
 {
-    [EventHandler("Incorrect.Routingkey")]
+    [EventListener("Incorrect.Routingkey")]
     internal class IncorrectRoutingKeyEventHandler
     {
         [Topic("#OtherEvent")]

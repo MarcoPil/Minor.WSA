@@ -102,7 +102,7 @@ public class DiTest : IDiTest
     }
 }
 
-[EventHandler("Unittest.WSA.DiTest")]
+[EventListener("Unittest.WSA.DiTest")]
 public class DiTestEventHandler
 {
     public IDiTest _injected = null;

@@ -1,4 +1,5 @@
 ﻿using Minor.WSA.Infrastructure;
+using Minor.WSA.Infrastructure.Shared;
 using Minor.WSA.Infrastructure.Test;
 using Minor.WSA.Infrastructure.Test.EventHandlerTests;
 using Moq;
@@ -60,12 +61,14 @@ public class MicroserviceHostTest
         var busOptions = new BusOptions(exchangeName: "MicroserviceHostTest02");
         using (var target = new MicroserviceHost(eventListeners, busOptions))
         {
+            target.StartListening();
+
             // Act
             target.StartHandling();
 
             // Assert
-            mock1.Verify(el => el.StartProcessing(), Times.Once);
-            mock2.Verify(el => el.StartProcessing(), Times.Once);
+            mock1.Verify(el => el.StartHandling(), Times.Once);
+            mock2.Verify(el => el.StartHandling(), Times.Once);
         }
 
         RabbitTestHelp.DeleteExchange(busOptions);
@@ -83,32 +86,23 @@ public class MicroserviceHostTest
         var paramType = typeof(DispatchTestEvent);
         var dispatcher = new EventDispatcher(factory, method, paramType);
     }
-    //[Fact]
-    //public void DispatchesEvents()
-    //{
-    //    var dispatcher = new EventDispatcher()
-    //    var eventListeners = new List<EventListener>
-    //    {
-    //        new EventListener("MicroserviceHostTest_Q01", null),
-    //    };
 
-    //    var busOptions = new BusOptions(exchangeName: "MicroserviceHostTest01");
-    //    using (var target = new MicroserviceHost(eventListeners, busOptions))
-    //    {
-    //        // Act
-    //        target.OpenConnection();
+    [Fact]
+    public void CannotStartHandlingBeforeStartListening()
+    {
+        var eventListeners = new List<IEventListener>();
 
-    //        // Assert
-    //        using (var publisher = new EventPublisher(busOptions))
-    //        {
-    //            publisher
-    //        }
-    //    }
-    //    RabbitTestHelp.DeleteExchange(busOptions);
-    //}
+        var busOptions = new BusOptions(exchangeName: "MicroserviceHostTest03");
+        using (var target = new MicroserviceHost(eventListeners, busOptions))
+        {
+            // Act
+            Action action = () => target.StartHandling();
 
+            // Assert
+            var ex = Assert.Throws<MicroserviceException>(action);
+            Assert.Equal("A MicroserviceHost can only start handling after start listening. Consider calling .StartListening() first.", ex.Message);
+        }
 
-
-
-
+        RabbitTestHelp.DeleteExchange(busOptions);
+    }
 }

@@ -12,11 +12,5 @@ namespace Minor.WSA.Infrastructure
         void Dispose();
     }
 
-    public delegate void EventReceivedCallback(EventReceivedArgs args);
-    public class EventReceivedArgs : EventArgs
-    {
-        public string RoutingKey { get; set; }
-        public string Json { get; set; }
-    }
-
+    public delegate void EventReceivedCallback(EventMessage eventMessage);
 }

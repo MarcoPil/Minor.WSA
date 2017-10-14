@@ -36,7 +36,7 @@ public class EventListenerTest
         {
             var target = new EventListener("EventListenerTest_Q01", dispatchers);
             target.OpenEventQueue(busOptions);
-            target.StartProcessing();
+            target.StartHandling();
 
             var evt = new DispatchTestEvent { Number = 7 };
             var publishBusOptions = new BusOptions(exchangeName: "EventListenerTest_Ex01");
@@ -79,7 +79,7 @@ public class EventListenerTest
         {
             var target = new EventListener("EventListenerTest_Q02", dispatchers);
             target.OpenEventQueue(busOptions);
-            target.StartProcessing();
+            target.StartHandling();
 
             var evt = new DispatchTestEvent { Number = 7 };
             var publishBusOptions = new BusOptions(exchangeName: "EventListenerTest_Ex02");
@@ -131,7 +131,7 @@ public class EventListenerTest
             Thread.Sleep(100);
 
             // Act
-            target.StartProcessing();
+            target.StartHandling();
 
             // Assert
             Thread.Sleep(100);
@@ -167,7 +167,7 @@ public class EventListenerTest
         {
             var target = new EventListener("EventListenerTest_Q04", dispatchers);
             target.OpenEventQueue(busOptions);
-            target.StartProcessing();
+            target.StartHandling();
 
             var evt = new DispatchTestEvent { Number = 7 };
             var publishBusOptions = new BusOptions(exchangeName: "EventListenerTest_Ex04");

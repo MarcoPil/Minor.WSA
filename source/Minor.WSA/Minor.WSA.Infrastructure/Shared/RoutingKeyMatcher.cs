@@ -8,9 +8,9 @@ namespace Minor.WSA.Infrastructure
     /// <summary>
     /// Utility class for routingkey expressions.
     /// </summary>
-    public class RoutingKeyMatcher
+    public static class RoutingKeyMatcher
     {
-        public static IEnumerable<string> Match(string routingKey, IEnumerable<string> routingKeyExpressions)
+        public static IEnumerable<string> ThatMatch(this IEnumerable<string> routingKeyExpressions, string routingKey)
         {
             return routingKeyExpressions.Where(expr => IsMatch(expr, routingKey));
         }

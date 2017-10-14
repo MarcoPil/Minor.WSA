@@ -3,14 +3,14 @@
 namespace Minor.WSA.Infrastructure
 {
     /// <summary>
-    /// This attribute should decorate each eventhandling class.
+    /// This attribute should decorate each event listening class.
     /// The QueueName is the name of the RabbitMQ-queue on which it will listen to incoming events.
     /// </summary>
-    public class EventHandlerAttribute : Attribute
+    public class EventListenerAttribute : Attribute
     {
         public string QueueName { get; }
 
-        public EventHandlerAttribute(string queueName)
+        public EventListenerAttribute(string queueName)
         {
             QueueName = queueName;
         }

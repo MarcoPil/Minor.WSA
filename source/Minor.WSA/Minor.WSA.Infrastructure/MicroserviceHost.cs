@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Minor.WSA.Infrastructure.Shared;
+using System;
 using System.Collections.Generic;
 
 namespace Minor.WSA.Infrastructure
@@ -8,12 +9,14 @@ namespace Minor.WSA.Infrastructure
     /// </summary>
     public class MicroserviceHost : EventBusBase
     {
+        private bool _isListening;
         public IEnumerable<IEventListener> EventListeners { get; }
 
         public MicroserviceHost(IEnumerable<IEventListener> eventListeners, BusOptions busOptions = default(BusOptions)) 
             : base(busOptions)
         {
             EventListeners = eventListeners;
+            _isListening = false;
         }
 
         /// <summary>
@@ -29,6 +32,7 @@ namespace Minor.WSA.Infrastructure
             {
                 listener.OpenEventQueue(BusOptions);
             }
+            _isListening = true;
         }
 
         /// <summary>
@@ -36,9 +40,16 @@ namespace Minor.WSA.Infrastructure
         /// </summary>
         public void StartHandling()
         {
-            foreach (var listener in EventListeners)
+            if (!_isListening)
             {
-                listener.StartProcessing();
+                throw new MicroserviceException("A MicroserviceHost can only start handling after start listening. Consider calling .StartListening() first.");
+            }
+            else
+            {
+                foreach (var listener in EventListeners)
+                {
+                    listener.StartHandling();
+                } 
             }
         }
     }

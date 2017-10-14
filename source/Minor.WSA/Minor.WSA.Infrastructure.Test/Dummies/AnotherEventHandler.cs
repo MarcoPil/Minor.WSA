@@ -1,6 +1,6 @@
 ﻿namespace Minor.WSA.Infrastructure.Test
 {
-    [EventHandler("Unittest.WSA.Test")]
+    [EventListener("Unittest.WSA.Test")]
     internal class AnotherEventHandler
     {
         public void Handle(SomeEvent evt)

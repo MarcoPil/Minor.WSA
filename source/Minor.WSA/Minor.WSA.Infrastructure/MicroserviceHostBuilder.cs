@@ -60,7 +60,7 @@ namespace Minor.WSA.Infrastructure
 
         private void FindEventHandlers(Type type)
         {
-            var eventHandlerAttr = type.GetTypeInfo().GetCustomAttribute<EventHandlerAttribute>();
+            var eventHandlerAttr = type.GetTypeInfo().GetCustomAttribute<EventListenerAttribute>();
             if (eventHandlerAttr != null)
             {
                 var factory = new TransientFactory(_serviceCollection, type);

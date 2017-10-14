@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MVM.Polisbeheer.EventHandlers
 {
-    [EventHandler("MVM.Polisbeheer.KlantbeheerEvents")]
+    [EventListener("MVM.Polisbeheer.KlantbeheerEvents")]
     public class KlantbeheerEventHandler
     {
         /// Default Topic = "#.Klantbeheer.KlantGeregistreerd" = "#.NaamEventHander.NaamEvent"

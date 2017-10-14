@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Minor.WSA.Infrastructure.Shared.TestBus;
+using Newtonsoft.Json;
 using System;
 
 namespace Minor.WSA.Infrastructure
@@ -32,7 +33,7 @@ namespace Minor.WSA.Infrastructure
         /// EventBus Provider. Each Event Bus (RabbitMq, Kafka, TestBus) should have its own BusProvider
         /// </summary>
         [JsonIgnore]
-        public BusProvider Provider { get; private set; }
+        public IBusProvider Provider { get; private set; }
 
         /// <summary>
         /// Makes a copy of the Busoptions, replacing all provided parameters
