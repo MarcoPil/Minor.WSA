@@ -37,7 +37,7 @@ public class MicroserviceHostBuilderIntegrationTest
 
         var result = target.UseConventions();
 
-        var handles = result.EventListeners.SelectMany(listener => listener.RoutingKeyExpressions);
+        var handles = result.EventListeners.SelectMany(listener => listener.TopicExpressions);
         Assert.Equal(2, handles.Count());
         Assert.Contains("#.Klantbeheer.KlantGeregistreerd", handles);
         Assert.Contains("MVM.Klantbeheer.KlantVerhuisd", handles);

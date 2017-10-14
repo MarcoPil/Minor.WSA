@@ -6,7 +6,7 @@ using RabbitMQ.Client.Events;
 
 namespace Minor.WSA.Infrastructure
 {
-    public class BusProvider : IDisposable
+    public class BusProvider : IDisposable, IBusProvider
     {
         private IConnection _connection;
         protected IModel Channel;
@@ -57,7 +57,7 @@ namespace Minor.WSA.Infrastructure
                                      body: buffer);
         }
 
-        public void CreateQueueWithKeys(string queueName, IEnumerable<string> routingKeyExpressions)
+        public void CreateQueueWithTopics(string queueName, IEnumerable<string> topicExpressions)
         {
             // declare queue
             // should be NO-auto delete queue,  (queue must survive the listener-process, so that no event gets lost.
@@ -68,17 +68,17 @@ namespace Minor.WSA.Infrastructure
                                  arguments: null);
 
             // do queue-bind for all routingkey expressions
-            foreach (var routingKeyExpr in routingKeyExpressions)
+            foreach (var topicExpr in topicExpressions)
             {
                 Channel.QueueBind(queue: queueName,
                                   exchange: busOptions.ExchangeName,
-                                  routingKey: routingKeyExpr,
+                                  routingKey: topicExpr,
                                   arguments: null);
             }
 
         }
 
-        internal void StartReceiving(string queueName, EventReceivedCallback callback)
+        public void StartReceiving(string queueName, EventReceivedCallback callback)
         {
             // register a BasicComsume WITH acknoledgement (only events that have been processed me be removed)
             var consumer = new EventingBasicConsumer(Channel);

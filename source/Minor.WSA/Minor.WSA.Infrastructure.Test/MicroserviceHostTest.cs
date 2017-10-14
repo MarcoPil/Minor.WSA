@@ -39,7 +39,7 @@ public class MicroserviceHostTest
         using (var target = new MicroserviceHost(eventListeners, busOptions))
         {
             // Act
-            target.Open();
+            target.StartListening();
 
             // Assert
             mock1.Verify(el => el.OpenEventQueue(It.IsAny<BusOptions>()), Times.Once);
@@ -61,7 +61,7 @@ public class MicroserviceHostTest
         using (var target = new MicroserviceHost(eventListeners, busOptions))
         {
             // Act
-            target.Start();
+            target.StartHandling();
 
             // Assert
             mock1.Verify(el => el.StartProcessing(), Times.Once);

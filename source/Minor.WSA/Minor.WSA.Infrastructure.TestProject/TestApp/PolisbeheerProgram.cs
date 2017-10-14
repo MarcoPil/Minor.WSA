@@ -24,10 +24,10 @@ namespace MVM.Polisbeheer
                             ;
             using (var host = hostbuilder.CreateHost())
             {
-                host.Open(); // Opens RabbitMQ connections and queues (the queues receive messages, the host only after start)
+                host.StartListening(); // Opens RabbitMQ connections and queues (the queues receive messages, the host only after start)
 
                 //host.StartAfterReplay(optionalEnvironmentVarAuditlogEndpointName);
-                host.Start();
+                host.StartHandling();
 
                 waitForEnd.WaitOne();
             }

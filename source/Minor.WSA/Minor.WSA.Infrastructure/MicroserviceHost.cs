@@ -21,7 +21,7 @@ namespace Minor.WSA.Infrastructure
         /// From this moment in time, all relevant events are captured in the queue(s). 
         /// The event are only processed after the .Start() method has been called.
         /// </summary>
-        public void Open()
+        public void StartListening()
         {
             base.CreateConnection();
 
@@ -34,7 +34,7 @@ namespace Minor.WSA.Infrastructure
         /// <summary>
         /// Start processing the events that have arrived in the opened queues.
         /// </summary>
-        public void Start()
+        public void StartHandling()
         {
             foreach (var listener in EventListeners)
             {

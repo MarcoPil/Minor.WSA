@@ -92,10 +92,10 @@ namespace Minor.WSA.Infrastructure
                     {
                         string routingKey;
 
-                        var routingKeyAttr = method.GetCustomAttribute<RoutingKeyAttribute>();
+                        var routingKeyAttr = method.GetCustomAttribute<TopicAttribute>();
                         if (routingKeyAttr != null)
                         {
-                            routingKey = routingKeyAttr.RoutingKey;
+                            routingKey = routingKeyAttr.Topic;
                             if (!RoutingKeyMatcher.IsValidRoutingKeyExpression(routingKey))
                             {
                                 throw new MicroserviceConfigurationException($"Routingkey Expression '{routingKey}' has an invalid expression format.");

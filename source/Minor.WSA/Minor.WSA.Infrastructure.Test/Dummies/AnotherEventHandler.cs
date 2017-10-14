@@ -7,7 +7,7 @@
         {
         }
 
-        [RoutingKey("WSA.Test.OtherEvent")]
+        [Topic("WSA.Test.OtherEvent")]
         public void Handle(OtherEvent evt)
         {
 

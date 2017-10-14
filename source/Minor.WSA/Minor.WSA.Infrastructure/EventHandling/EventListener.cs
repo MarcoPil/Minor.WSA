@@ -20,7 +20,7 @@ namespace Minor.WSA.Infrastructure
         private BusOptions _busOptions;
 
         public string QueueName { get; }
-        public IEnumerable<string> RoutingKeyExpressions => _dispatchers.Keys;
+        public IEnumerable<string> TopicExpressions => _dispatchers.Keys;
 
         public EventListener(string queueName, Dictionary<string, EventDispatcher> dispatchers)
         {
@@ -38,7 +38,7 @@ namespace Minor.WSA.Infrastructure
         {
             _busOptions = busOptions;
 
-            busOptions.Provider.CreateQueueWithKeys(QueueName, RoutingKeyExpressions);
+            busOptions.Provider.CreateQueueWithTopics(QueueName, TopicExpressions);
 
             // (from this moment in time, all relevant events are captured in the queue, for later processing)
         }
@@ -53,7 +53,7 @@ namespace Minor.WSA.Infrastructure
 
         protected virtual void EventReceived(EventReceivedArgs args)
         {
-            var matchingKeys = RoutingKeyMatcher.Match(args.RoutingKey, RoutingKeyExpressions);
+            var matchingKeys = RoutingKeyMatcher.Match(args.RoutingKey, TopicExpressions);
 
             foreach (string matchingKey in matchingKeys)
             {
@@ -61,12 +61,5 @@ namespace Minor.WSA.Infrastructure
                 dispatcher.DispatchEvent(args.Json);
             }
         }
-    }
-
-    public delegate void EventReceivedCallback(EventReceivedArgs args);
-    public class EventReceivedArgs : EventArgs
-    {
-        public string RoutingKey { get; set; }
-        public string Json { get; set; }
     }
 }

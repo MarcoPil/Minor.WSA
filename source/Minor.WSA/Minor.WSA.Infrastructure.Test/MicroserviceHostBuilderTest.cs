@@ -29,7 +29,7 @@ public class MicroserviceHostBuilderTest
 
         Assert.Equal(1, result.Factories.Count());
         Assert.Contains("Minor.WSA.Infrastructure.Test.AnotherEventHandler", result.Factories);
-        var routingkeys = result.EventListeners.First().RoutingKeyExpressions;
+        var routingkeys = result.EventListeners.First().TopicExpressions;
         Assert.Equal(2, routingkeys.Count());
         Assert.Contains("#.Another.SomeEvent", routingkeys);
         Assert.Contains("WSA.Test.OtherEvent", routingkeys);
@@ -77,8 +77,8 @@ public class MicroserviceHostBuilderTest
         using (var host = target.CreateHost())
         using (var publisher = new EventPublisher(busOptions))
         {
-            host.Open();
-            host.Start();
+            host.StartListening();
+            host.StartHandling();
 
             var evt = new SomeEvent();
             publisher.Publish(evt); // publish the event once
@@ -113,7 +113,7 @@ public class DiTestEventHandler
         _injected = injectable;
     }
 
-    [RoutingKey("Test.WSA.SomeEvent")]
+    [Topic("Test.WSA.SomeEvent")]
     public void Handle(SomeEvent evt)
     {
         GlobalCallCount++;
