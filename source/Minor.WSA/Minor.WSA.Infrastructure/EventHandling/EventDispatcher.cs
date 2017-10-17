@@ -17,9 +17,9 @@ namespace Minor.WSA.Infrastructure
             this.paramType = paramType;
         }
 
-        public void DispatchEvent(string jsonMessage)
+        public virtual void DispatchEvent(EventMessage eventMessage)
         {
-            var paramObj = JsonConvert.DeserializeObject(jsonMessage, paramType);
+            var paramObj = JsonConvert.DeserializeObject(eventMessage.JsonMessage, paramType);
             var instance = factory.GetInstance();
             method.Invoke(instance, new object[]{ paramObj });
         }

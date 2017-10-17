@@ -27,7 +27,8 @@ public class EventDispatcherTest
 
         // Act
         string jsonMessage = "{\"Number\":7,\"RoutingKey\":\"MVM.Test.DispatchTest\",\"Timestamp\":636209314900846110,\"ID\":\"75236abd-078e-4855-a83b-a9cb5d61a47a\"}";
-        target.DispatchEvent(jsonMessage);
+        var eventMessage = new EventMessage(0, null, null, null, jsonMessage);
+        target.DispatchEvent(eventMessage);
 
         // Assert
         Assert.NotNull(testHandler.EventReceived);
@@ -38,7 +39,7 @@ public class EventDispatcherTest
     }
 
     [Fact]
-    public void DispatchesEvent_JsonHasMorePrepertiesThanLocalEvent()
+    public void DispatchesEvent_JsonHasMorePropertiesThanLocalEvent()
     {
         // Arrange
         var testHandler = new DispatcherTestMock();
@@ -53,7 +54,8 @@ public class EventDispatcherTest
 
         // Act
         string jsonMessage = "{\"Thing\":16,\"Number\":17,\"otherThing\":18,\"RoutingKey\":\"MVM.Test.DispatchTest\",\"Timestamp\":636209314900846111,\"ID\":\"75236abd-078e-4855-a83b-a9cb5d61a47b\"}";
-        target.DispatchEvent(jsonMessage);
+        var eventMessage = new EventMessage(0, null, null, null, jsonMessage);
+        target.DispatchEvent(eventMessage);
 
         // Assert
         Assert.NotNull(testHandler.EventReceived);
@@ -80,7 +82,8 @@ public class EventDispatcherTest
 
         // Act
         string jsonMessage = "{\"RoutingKey\":\"MVM.Test.DispatchTest\",\"Timestamp\":636209314900846112,\"ID\":\"75236abd-078e-4855-a83b-a9cb5d61a47c\"}";
-        target.DispatchEvent(jsonMessage);
+        var eventMessage = new EventMessage(0, null, null, null, jsonMessage);
+        target.DispatchEvent(eventMessage);
 
         // Assert
         Assert.NotNull(testHandler.EventReceived);

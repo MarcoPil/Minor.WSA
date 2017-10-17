@@ -21,14 +21,14 @@ public class MicroserviceHostBuilderTest
     }
 
     [Fact]
-    public void BuilderAddEventHandler()
+    public void BuilderAddEventListener()
     {
         var target = new MicroserviceHostBuilder();
 
-        MicroserviceHostBuilder result = target.AddEventHandler<AnotherEventHandler>();
+        MicroserviceHostBuilder result = target.AddEventListener<AnotherEventListener>();
 
         Assert.Equal(1, result.Factories.Count());
-        Assert.Contains("Minor.WSA.Infrastructure.Test.AnotherEventHandler", result.Factories);
+        Assert.Contains("Minor.WSA.Infrastructure.Test.AnotherEventListener", result.Factories);
         var routingkeys = result.EventListeners.First().TopicExpressions;
         Assert.Equal(2, routingkeys.Count());
         Assert.Contains("#.Another.SomeEvent", routingkeys);
@@ -42,11 +42,11 @@ public class MicroserviceHostBuilderTest
 
         Action action = () =>
         {
-            MicroserviceHostBuilder result = target.AddEventHandler<IncorrectRoutingKeyEventHandler>();
+            MicroserviceHostBuilder result = target.AddEventListener<IncorrectTopicEventListener>();
         };
 
         var ex = Assert.Throws<MicroserviceConfigurationException>(action);
-        Assert.Equal("Routingkey Expression '#OtherEvent' has an invalid expression format.", ex.Message);
+        Assert.Equal("Topic Expression '#OtherEvent' has an invalid expression format.", ex.Message);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class MicroserviceHostBuilderTest
 
         var target = new MicroserviceHostBuilder()
             .WithBusOptions(busOptions)
-            .AddEventHandler<DiTestEventHandler>();
+            .AddEventListener<DiTestEventListener>();
         DiTest.ContructionCount = 0;
         target.ServiceProvider.AddTransient<IDiTest, DiTest>();
 
@@ -85,37 +85,67 @@ public class MicroserviceHostBuilderTest
             publisher.Publish(evt); // publish the event once
             Thread.Sleep(100);
 
-            Assert.Equal(2, DiTestEventHandler.GlobalCallCount);
+            Assert.Equal(2, DiTestEventListener.GlobalCallCountHandle);
             Assert.Equal(2, DiTest.ContructionCount);
         }
     }
-}
-
-public interface IDiTest { }
-public class DiTest : IDiTest
-{
-    public static int ContructionCount = 0;
-    
-    public DiTest()
+    #region DoDependencyInjection Test Dummies
+    private interface IDiTest { }
+    private class DiTest : IDiTest
     {
-        ContructionCount++;
-    }
-}
+        public static int ContructionCount = 0;
 
-[EventListener("Unittest.WSA.DiTest")]
-public class DiTestEventHandler
-{
-    public IDiTest _injected = null;
-    public static int GlobalCallCount = 0;
-
-    public DiTestEventHandler(IDiTest injectable)
-    {
-        _injected = injectable;
+        public DiTest()
+        {
+            ContructionCount++;
+        }
     }
 
-    [Topic("Test.WSA.SomeEvent")]
-    public void Handle(SomeEvent evt)
+    [EventListener("Unittest.WSA.DiTest")]
+    private class DiTestEventListener
     {
-        GlobalCallCount++;
+        public IDiTest _injected = null;
+        public static int GlobalCallCountHandle = 0;
+        public static int GlobalCallCountOtherHandle = 0;
+
+        public DiTestEventListener(IDiTest injectable)
+        {
+            _injected = injectable;
+        }
+
+        [Topic("Test.WSA.SomeEvent")]
+        public void Handle(SomeEvent evt)
+        {
+            GlobalCallCountHandle++;
+        }
     }
+    #endregion DoDependencyInjection Test Dummies
+
+    [Fact]
+    public void CannotHaveTwoIdenticalTopicExpressions()
+    {
+        var target = new MicroserviceHostBuilder();
+        
+        Action action = () => target.AddEventListener<InvalidDuplicateTestEventListener>();
+
+        var ex = Assert.Throws<MicroserviceConfigurationException>(action);
+        Assert.Equal("Two topic expressions cannot be exactly identical. The topic expression 'Test.WSA.SomeEvent' has already been registered.", ex.Message);
+    }
+    #region CannotHaveTwoIdenticalTopicExpressions Test Dummies
+    [EventListener("Unittest.WSA.InvalidDuplicateTest")]
+    private class InvalidDuplicateTestEventListener
+    {
+        [Topic("Test.WSA.SomeEvent")]
+        public void Handle(SomeEvent evt)
+        {
+        }
+        [Topic("Test.WSA.SomeEvent")]
+        public void OtherHandle(SomeEvent evt)
+        {
+        }
+    }
+    #endregion CannotHaveTwoIdenticalTopicExpressions Test Dummies
+
 }
+
+

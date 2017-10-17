@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace MVM.Polisbeheer.EventHandlers
 {
     [EventListener("MVM.Polisbeheer.KlantbeheerEvents")]
-    public class KlantbeheerEventHandler
+    public class KlantbeheerEventListener
     {
-        /// Default Topic = "#.Klantbeheer.KlantGeregistreerd" = "#.NaamEventHander.NaamEvent"
+        /// Default Topic = "#.Klantbeheer.KlantGeregistreerd" = "#.NaamEventListener.NaamEvent"
         public void KlantGeregistreerd(KlantGeregistreerd evt)
         {
 

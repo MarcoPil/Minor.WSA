@@ -57,7 +57,7 @@ namespace Minor.WSA.Infrastructure
             foreach (string matchingKey in matchingKeys)
             {
                 var dispatcher = _dispatchers[matchingKey];
-                dispatcher.DispatchEvent(eventMessage.JsonMessage);
+                dispatcher.DispatchEvent(eventMessage);
             }
         }
     }

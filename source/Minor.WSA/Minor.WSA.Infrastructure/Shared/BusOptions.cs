@@ -30,10 +30,10 @@ namespace Minor.WSA.Infrastructure
         /// </summary>
         public string Password { get; private set; }
         /// <summary>
-        /// EventBus Provider. Each Event Bus (RabbitMq, Kafka, TestBus) should have its own BusProvider
+        /// EventBus Provider. Each Event Bus (RabbitMq, TestBus) should have its own BusProvider
         /// </summary>
         [JsonIgnore]
-        public IBusProvider Provider { get; private set; }
+        public virtual IBusProvider Provider { get; protected set; }
 
         /// <summary>
         /// Makes a copy of the Busoptions, replacing all provided parameters
@@ -53,6 +53,7 @@ namespace Minor.WSA.Infrastructure
                 Port = port ?? this.Port,
                 UserName = userName ?? this.UserName,
                 Password = password ?? this.Password,
+                Provider = this.Provider,
             };
         }
 

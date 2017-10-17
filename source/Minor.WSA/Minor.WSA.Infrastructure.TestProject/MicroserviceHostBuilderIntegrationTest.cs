@@ -15,7 +15,7 @@ public class MicroserviceHostBuilderIntegrationTest
         var result = target.UseConventions();
 
         Assert.Equal(1, result.Factories.Count());
-        Assert.Contains("MVM.Polisbeheer.EventHandlers.KlantbeheerEventHandler", result.Factories);
+        Assert.Contains("MVM.Polisbeheer.EventHandlers.KlantbeheerEventListener", result.Factories);
     }
 
 

@@ -6,18 +6,18 @@ using System.Text.RegularExpressions;
 namespace Minor.WSA.Infrastructure
 {
     /// <summary>
-    /// Utility class for routingkey expressions.
+    /// Utility class for matching routingkeys to topic expressions.
     /// </summary>
     public static class RoutingKeyMatcher
     {
-        public static IEnumerable<string> ThatMatch(this IEnumerable<string> routingKeyExpressions, string routingKey)
+        public static IEnumerable<string> ThatMatch(this IEnumerable<string> topicExpressions, string routingKey)
         {
-            return routingKeyExpressions.Where(expr => IsMatch(expr, routingKey));
+            return topicExpressions.Where(expr => IsMatch(expr, routingKey));
         }
 
-        public static bool IsMatch(string routingKeyExpression, string routingKey)
+        public static bool IsMatch(string topicExpression, string routingKey)
         {
-            var pattern = routingKeyExpression
+            var pattern = topicExpression
                       .Replace(@".", @"\.")
                       .Replace(@"*", @"[^.]*")
                       .Replace(@"#", @".*")
@@ -29,12 +29,12 @@ namespace Minor.WSA.Infrastructure
         }
 
         private const string part = @"([^.#*]*|\#|\*)";
-        private const string RoutingKeyPattern = @"^" + part + @"(\." + part + @")*$";
-        private static readonly Regex ValidRoutingKeyRegex = new Regex(RoutingKeyPattern, RegexOptions.Compiled);
+        private const string TopicPattern = @"^" + part + @"(\." + part + @")*$";
+        private static readonly Regex ValidTopicRegex = new Regex(TopicPattern, RegexOptions.Compiled);
 
-        public static bool IsValidRoutingKeyExpression(string expression)
+        public static bool IsValidTopicExpression(string expression)
         {
-            return ValidRoutingKeyRegex.IsMatch(expression);
+            return ValidTopicRegex.IsMatch(expression);
         }
     }
 }

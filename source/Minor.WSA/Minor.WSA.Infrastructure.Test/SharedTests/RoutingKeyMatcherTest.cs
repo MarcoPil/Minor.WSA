@@ -33,32 +33,32 @@ public class RoutingKeyMatcherTest
     [Fact]
     public void IsValidRoutingKeyExpressionTest()
     {
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("Test"), "Test");
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("*"), "*");
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("#"), "#");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("Test"), "Test");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("*"), "*");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("#"), "#");
 
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("MVM.Test"), "MVM.Test");
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("MVM.*"), "MVM.*");
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("MVM.#"), "MVM.#");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("MVM.Test"), "MVM.Test");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("MVM.*"), "MVM.*");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("MVM.#"), "MVM.#");
 
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("Test.Event"), "Test.Event");
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("*.Event"), "*.Event");
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("#.Event"), "#.Event");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("Test.Event"), "Test.Event");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("*.Event"), "*.Event");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("#.Event"), "#.Event");
 
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("MVM.Test.Event"), "MVM.Test.Event");
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("MVM.*.Event"), "MVM.*.Event");
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("MVM.#.Event"), "MVM.#.Event");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("MVM.Test.Event"), "MVM.Test.Event");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("MVM.*.Event"), "MVM.*.Event");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("MVM.#.Event"), "MVM.#.Event");
 
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("Test.Event.#"), "Test.Event.#");
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("*.Event.#"), "*.Event.#");
-        Assert.True(RoutingKeyMatcher.IsValidRoutingKeyExpression("*.*.#.Event.#"), "*.*.#.Event.#");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("Test.Event.#"), "Test.Event.#");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("*.Event.#"), "*.Event.#");
+        Assert.True(RoutingKeyMatcher.IsValidTopicExpression("*.*.#.Event.#"), "*.*.#.Event.#");
 
-        Assert.False(RoutingKeyMatcher.IsValidRoutingKeyExpression("#Event"), "#Event");
-        Assert.False(RoutingKeyMatcher.IsValidRoutingKeyExpression("*Event"), "*Event");
-        Assert.False(RoutingKeyMatcher.IsValidRoutingKeyExpression("*#"), "*#");
-        Assert.False(RoutingKeyMatcher.IsValidRoutingKeyExpression("MVM.#Event"), "MVM.#Event");
-        Assert.False(RoutingKeyMatcher.IsValidRoutingKeyExpression("MVM.*Event"), "MVM.*Event");
-        Assert.False(RoutingKeyMatcher.IsValidRoutingKeyExpression("MVM.*#"), "MVM.*#");
+        Assert.False(RoutingKeyMatcher.IsValidTopicExpression("#Event"), "#Event");
+        Assert.False(RoutingKeyMatcher.IsValidTopicExpression("*Event"), "*Event");
+        Assert.False(RoutingKeyMatcher.IsValidTopicExpression("*#"), "*#");
+        Assert.False(RoutingKeyMatcher.IsValidTopicExpression("MVM.#Event"), "MVM.#Event");
+        Assert.False(RoutingKeyMatcher.IsValidTopicExpression("MVM.*Event"), "MVM.*Event");
+        Assert.False(RoutingKeyMatcher.IsValidTopicExpression("MVM.*#"), "MVM.*#");
     }
 
     [Fact]

@@ -37,35 +37,35 @@ namespace Minor.WSA.Infrastructure
 
         public MicroserviceHostBuilder UseConventions()
         {
-            FindEventHandlers();
+            FindEventListeners();
             return this;        // for call chaining
         }
 
-        public MicroserviceHostBuilder AddEventHandler<T>()
+        public MicroserviceHostBuilder AddEventListener<T>()
         {
-            FindEventHandlers(typeof(T));
+            FindEventListeners(typeof(T));
             return this;        // for call chaining
         }
 
-        private void FindEventHandlers()
+        private void FindEventListeners()
         {
             var thisAssembly = this.GetType().GetTypeInfo().Assembly;
             var referencingAssemblies = GetRefencingAssemblies(thisAssembly);
 
             foreach (var type in referencingAssemblies.SelectMany(a => a.GetTypes()))
             {
-                FindEventHandlers(type);
+                FindEventListeners(type);
             }
         }
 
-        private void FindEventHandlers(Type type)
+        private void FindEventListeners(Type type)
         {
-            var eventHandlerAttr = type.GetTypeInfo().GetCustomAttribute<EventListenerAttribute>();
-            if (eventHandlerAttr != null)
+            var eventListenerAttr = type.GetTypeInfo().GetCustomAttribute<EventListenerAttribute>();
+            if (eventListenerAttr != null)
             {
                 var factory = new TransientFactory(_serviceCollection, type);
                 _factories.Add(type, factory);
-                _eventListeners.Add(CreateEventListener(type, eventHandlerAttr.QueueName, factory));
+                _eventListeners.Add(CreateEventListener(type, eventListenerAttr.QueueName, factory));
             }
         }
 
@@ -80,46 +80,81 @@ namespace Minor.WSA.Infrastructure
 
         private EventListener CreateEventListener(Type type, string queueName, IFactory factory)
         {
-            var eventHandles = new Dictionary<string, EventDispatcher>();
+            var eventHandlers = new Dictionary<string, EventDispatcher>();
 
             var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
-                if (method.GetParameters().Length == 1)
-                {
-                    var paramType = method.GetParameters().First().ParameterType;
-                    if (typeof(DomainEvent).IsAssignableFrom(paramType))
-                    {
-                        string routingKey;
-
-                        var routingKeyAttr = method.GetCustomAttribute<TopicAttribute>();
-                        if (routingKeyAttr != null)
-                        {
-                            routingKey = routingKeyAttr.Topic;
-                            if (!RoutingKeyMatcher.IsValidRoutingKeyExpression(routingKey))
-                            {
-                                throw new MicroserviceConfigurationException($"Routingkey Expression '{routingKey}' has an invalid expression format.");
-                            }
-                        }
-                        else
-                        {
-                            string typeName = type.Name;
-                            if (typeName.EndsWith("EventHandler"))
-                            {
-                                int pos = typeName.LastIndexOf("EventHandler");
-                                typeName = typeName.Substring(0, pos);
-                            }
-                            routingKey = "#." + typeName + "." + paramType.Name;
-                        }
-                        eventHandles.Add(routingKey, new EventDispatcher(factory, method, paramType));
-                    }
-                    //if (paramType == typeof(Newtonsoft.Json.Linq.JObject))
-                    //{
-                    //    _eventHandles.Add("#", new EventDispatcher(??, method, typeof(object)));
-                    //}
-                }
+                CreateEventHandler(type, factory, eventHandlers, method);
             }
-            return new EventListener(queueName, eventHandles);
+            return new EventListener(queueName, eventHandlers);
+        }
+
+        private static void CreateEventHandler(Type type, IFactory factory, Dictionary<string, EventDispatcher> eventHandlers, MethodInfo method)
+        {
+            if (method.GetParameters().Length == 1)
+            {
+                string topicExpression = null;
+
+                var paramType = method.GetParameters().First().ParameterType;
+                if (typeof(DomainEvent).IsAssignableFrom(paramType))
+                {
+                    topicExpression = TopicFromAttributeOrDefault(method);
+
+                    if (topicExpression == null)
+                    {
+                        string typeName = type.Name;
+                        if (typeName.EndsWith("EventListener"))
+                        {
+                            int pos = typeName.LastIndexOf("EventListener");
+                            typeName = typeName.Substring(0, pos);
+                        }
+                        topicExpression = "#." + typeName + "." + paramType.Name;
+                    }
+
+                    var dispatcher = new EventDispatcher(factory, method, paramType);
+                    AddDispatcherIfTopicIsUnique(eventHandlers, topicExpression, dispatcher);
+                }
+                else if (paramType == typeof(EventMessage))
+                {
+                    topicExpression = TopicFromAttributeOrDefault(method) ?? "#";
+
+                    var dispatcher = new EventDispatcher(factory, method, paramType);
+                    AddDispatcherIfTopicIsUnique(eventHandlers, topicExpression, dispatcher);
+                }
+
+            }
+        }
+
+        private static string TopicFromAttributeOrDefault(MethodInfo method)
+        {
+            string topicExpression;
+            var topicAttr = method.GetCustomAttribute<TopicAttribute>();
+            if (topicAttr != null)
+            {
+                topicExpression = topicAttr.Topic;
+                if (!RoutingKeyMatcher.IsValidTopicExpression(topicExpression))
+                {
+                    throw new MicroserviceConfigurationException($"Topic Expression '{topicExpression}' has an invalid expression format.");
+                }
+                return topicExpression;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private static void AddDispatcherIfTopicIsUnique(Dictionary<string, EventDispatcher> eventHandlers, string topicExpression, EventDispatcher dispatcher)
+        {
+            if (eventHandlers.ContainsKey(topicExpression))
+            {
+                throw new MicroserviceConfigurationException($"Two topic expressions cannot be exactly identical. The topic expression '{topicExpression}' has already been registered.");
+            }
+            else
+            {
+                eventHandlers.Add(topicExpression, dispatcher);
+            }
         }
 
         public MicroserviceHost CreateHost()
