@@ -146,6 +146,49 @@ public class MicroserviceHostBuilderTest
     }
     #endregion CannotHaveTwoIdenticalTopicExpressions Test Dummies
 
+    [Fact]
+    public void EventListenerCanHaveOtherMethods()
+    {
+        var target = new MicroserviceHostBuilder();
+
+        target.AddEventListener<EventListenerWithOtherMethods>();
+
+        Assert.Equal(1, target.EventListeners.Count());
+    }
+    #region EventListenerCanHaveOtherMethods Test Dummies
+    [EventListener("Unittest.WSA.EventListenerWithOtherMethods")]
+    private class EventListenerWithOtherMethods
+    {
+        public void GenericHandler(EventMessage eventMessage)
+        {
+        }
+        public void NotAnHandler(int a, Boolean b)
+        {
+        }
+    }
+    #endregion EventListenerCanHaveOtherMethods Test Dummies
+
+    [Fact]
+    public void TopicCannotBeNull()
+    {
+        var target = new MicroserviceHostBuilder();
+
+        Action action = () => target.AddEventListener<EventListenerWithNullTopic>();
+
+        var ex = Assert.Throws<MicroserviceConfigurationException>(action);
+        Assert.Equal("Topic Expression '' has an invalid expression format.", ex.Message);
+    }
+    #region TopicCannotBeNull Test Dummies
+    [EventListener("Unittest.WSA.EventListenerWithOtherMethods")]
+    private class EventListenerWithNullTopic
+    {
+        [Topic(null)]
+        public void GenericHandler(EventMessage eventMessage)
+        {
+        }
+    }
+    #endregion TopicCannotBeNull Test Dummies
+
 }
 
 

@@ -28,7 +28,7 @@ namespace Minor.WSA.Infrastructure
             return regex.IsMatch(routingKey);
         }
 
-        private const string part = @"([^.#*]*|\#|\*)";
+        private const string part = @"([^.#*]+|\#|\*)";
         private const string TopicPattern = @"^" + part + @"(\." + part + @")*$";
         private static readonly Regex ValidTopicRegex = new Regex(TopicPattern, RegexOptions.Compiled);
 

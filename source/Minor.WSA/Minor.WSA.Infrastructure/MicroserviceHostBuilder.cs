@@ -85,12 +85,24 @@ namespace Minor.WSA.Infrastructure
             var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
-                CreateEventHandler(type, factory, eventHandlers, method);
+                var (topicExpression, dispatcher) = CreateEventHandler(type, factory, method);
+                if (topicExpression != null)
+                {
+                    if (eventHandlers.ContainsKey(topicExpression))
+                    {
+                        throw new MicroserviceConfigurationException($"Two topic expressions cannot be exactly identical. The topic expression '{topicExpression}' has already been registered.");
+                    }
+                    else
+                    {
+                        eventHandlers.Add(topicExpression, dispatcher);
+                    }
+                }
+
             }
             return new EventListener(queueName, eventHandlers);
         }
 
-        private static void CreateEventHandler(Type type, IFactory factory, Dictionary<string, EventDispatcher> eventHandlers, MethodInfo method)
+        private static (string, EventDispatcher) CreateEventHandler(Type type, IFactory factory, MethodInfo method)
         {
             if (method.GetParameters().Length == 1)
             {
@@ -113,48 +125,29 @@ namespace Minor.WSA.Infrastructure
                     }
 
                     var dispatcher = new EventDispatcher(factory, method, paramType);
-                    AddDispatcherIfTopicIsUnique(eventHandlers, topicExpression, dispatcher);
+                    return (topicExpression, dispatcher);
                 }
                 else if (paramType == typeof(EventMessage))
                 {
                     topicExpression = TopicFromAttributeOrDefault(method) ?? "#";
 
                     var dispatcher = new EventDispatcher(factory, method, paramType);
-                    AddDispatcherIfTopicIsUnique(eventHandlers, topicExpression, dispatcher);
+                    return (topicExpression, dispatcher);
                 }
-
             }
+            return (null, null);
         }
 
         private static string TopicFromAttributeOrDefault(MethodInfo method)
         {
-            string topicExpression;
             var topicAttr = method.GetCustomAttribute<TopicAttribute>();
-            if (topicAttr != null)
+            string topicExpression = topicAttr?.Topic;
+            if (topicExpression == null && topicAttr != null  ||
+                topicExpression != null && !RoutingKeyMatcher.IsValidTopicExpression(topicExpression))
             {
-                topicExpression = topicAttr.Topic;
-                if (!RoutingKeyMatcher.IsValidTopicExpression(topicExpression))
-                {
-                    throw new MicroserviceConfigurationException($"Topic Expression '{topicExpression}' has an invalid expression format.");
-                }
-                return topicExpression;
+                throw new MicroserviceConfigurationException($"Topic Expression '{topicExpression}' has an invalid expression format.");
             }
-            else
-            {
-                return null;
-            }
-        }
-
-        private static void AddDispatcherIfTopicIsUnique(Dictionary<string, EventDispatcher> eventHandlers, string topicExpression, EventDispatcher dispatcher)
-        {
-            if (eventHandlers.ContainsKey(topicExpression))
-            {
-                throw new MicroserviceConfigurationException($"Two topic expressions cannot be exactly identical. The topic expression '{topicExpression}' has already been registered.");
-            }
-            else
-            {
-                eventHandlers.Add(topicExpression, dispatcher);
-            }
+            return topicExpression;
         }
 
         public MicroserviceHost CreateHost()
