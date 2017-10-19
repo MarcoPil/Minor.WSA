@@ -80,7 +80,7 @@ namespace Minor.WSA.Infrastructure
 
         private EventListener CreateEventListener(Type type, string queueName, IFactory factory)
         {
-            var eventHandlers = new Dictionary<string, EventDispatcher>();
+            var eventHandlers = new Dictionary<string, IEventDispatcher>();
 
             var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
@@ -102,7 +102,7 @@ namespace Minor.WSA.Infrastructure
             return new EventListener(queueName, eventHandlers);
         }
 
-        private static (string, EventDispatcher) CreateEventHandler(Type type, IFactory factory, MethodInfo method)
+        private static (string, IEventDispatcher) CreateEventHandler(Type type, IFactory factory, MethodInfo method)
         {
             if (method.GetParameters().Length == 1)
             {
@@ -131,7 +131,7 @@ namespace Minor.WSA.Infrastructure
                 {
                     topicExpression = TopicFromAttributeOrDefault(method) ?? "#";
 
-                    var dispatcher = new EventDispatcher(factory, method, paramType);
+                    var dispatcher = new GenericEventDispatcher(factory, method);
                     return (topicExpression, dispatcher);
                 }
             }

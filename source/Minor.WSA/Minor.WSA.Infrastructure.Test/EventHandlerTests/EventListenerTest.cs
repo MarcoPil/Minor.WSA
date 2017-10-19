@@ -26,7 +26,7 @@ public class EventListenerTest
         var method = typeof(DispatcherTestMock).GetMethod("HandleDispatchTestEvent");
         var paramType = typeof(DispatchTestEvent);
 
-        var dispatchers = new Dictionary<string, EventDispatcher>();
+        var dispatchers = new Dictionary<string, IEventDispatcher>();
         dispatchers.Add("MVM.Test.DispatchTest", new EventDispatcher(factory, method, paramType));
 
         var busOptions = new BusOptions(exchangeName: "EventListenerTest_Ex01");
@@ -69,7 +69,7 @@ public class EventListenerTest
         var method = typeof(DispatcherTestMock).GetMethod("HandleDispatchTestEvent");
         var paramType = typeof(DispatchTestEvent);
 
-        var dispatchers = new Dictionary<string, EventDispatcher>();
+        var dispatchers = new Dictionary<string, IEventDispatcher>();
         dispatchers.Add("Wrong.RoutingKey", new EventDispatcher(factory, method, paramType));
 
         var busOptions = new BusOptions(exchangeName: "EventListenerTest_Ex02");
@@ -111,7 +111,7 @@ public class EventListenerTest
         var method = typeof(DispatcherTestMock).GetMethod("HandleDispatchTestEvent");
         var paramType = typeof(DispatchTestEvent);
 
-        var dispatchers = new Dictionary<string, EventDispatcher>();
+        var dispatchers = new Dictionary<string, IEventDispatcher>();
         dispatchers.Add("MVM.Test.DispatchTest", new EventDispatcher(factory, method, paramType));
 
         var busOptions = new BusOptions(exchangeName: "EventListenerTest_Ex03");
@@ -156,7 +156,7 @@ public class EventListenerTest
         var method = typeof(DispatcherTestMock).GetMethod("HandleDispatchTestEvent");
         var paramType = typeof(DispatchTestEvent);
 
-        var dispatchers = new Dictionary<string, EventDispatcher>();
+        var dispatchers = new Dictionary<string, IEventDispatcher>();
         dispatchers.Add("*.Test.DispatchTest", new EventDispatcher(factory, method, paramType));
         dispatchers.Add("MVM.*.DispatchTest", new EventDispatcher(factory, method, paramType));
 

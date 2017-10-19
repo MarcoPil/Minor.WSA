@@ -16,13 +16,13 @@ namespace Minor.WSA.Infrastructure
     /// </summary>
     public class EventListener : IEventListener
     {
-        private Dictionary<string, EventDispatcher> _dispatchers; //    string = topic-expression
+        private Dictionary<string, IEventDispatcher> _dispatchers; //    string = topic-expression
         private BusOptions _busOptions;
 
         public string QueueName { get; }
         public IEnumerable<string> TopicExpressions => _dispatchers.Keys;
 
-        public EventListener(string queueName, Dictionary<string, EventDispatcher> dispatchers)
+        public EventListener(string queueName, Dictionary<string, IEventDispatcher> dispatchers)
         {
             QueueName = queueName;
             _dispatchers = dispatchers;

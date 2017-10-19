@@ -72,26 +72,35 @@ namespace Minor.WSA.Infrastructure.Test
             var builder = new MicroserviceHostBuilder()
                 .WithBusOptions(options)
                 .AddEventListener<ReceivingGenericEventListener>();
+            var evt = new NonGenericEvent { Number = 3 };
             using (var host = builder.CreateHost())
             {
                 host.StartListening();
                 host.StartHandling();
                 using (var publisher = new EventPublisher(options))
                 {
-                    publisher.Publish(new NonGenericEvent());
+                    publisher.Publish(evt);
                 }
             }
             Thread.Sleep(200);
             Assert.Equal(1, ReceivingGenericEventListener.CallCount);
+            Assert.Equal(evt.ID.ToString(), ReceivingGenericEventListener.LastMessage.CorrelationId);
+            Assert.Equal(evt.Timestamp, ReceivingGenericEventListener.LastMessage.Timestamp);
+            Assert.Equal(evt.RoutingKey, ReceivingGenericEventListener.LastMessage.RoutingKey);
+            Assert.Equal(typeof(NonGenericEvent).FullName, ReceivingGenericEventListener.LastMessage.EventType);
+            var expectedJson = $"{{\"Number\":3,\"RoutingKey\":\"Test.WSA.NonGenericEvent\",\"Timestamp\":{evt.Timestamp},\"ID\":\"{evt.ID}\"}}";
+            Assert.Equal(expectedJson, ReceivingGenericEventListener.LastMessage.JsonMessage);
         }
         #region Test Dummies for ReceivingGenericEventListener  
         [EventListener("GenericEventListener.TestQueue")]
         private class ReceivingGenericEventListener
         {
             public static int CallCount = 0;
+            public static EventMessage LastMessage = null;
             public void GenericHandler(EventMessage eventMessage)
             {
                 CallCount++;
+                LastMessage = eventMessage;
             }
         }
 

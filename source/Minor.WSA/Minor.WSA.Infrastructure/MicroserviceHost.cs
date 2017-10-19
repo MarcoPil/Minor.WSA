@@ -20,9 +20,19 @@ namespace Minor.WSA.Infrastructure
         }
 
         /// <summary>
+        /// Declares an Exchange, starts listening en starts processing events.
+        /// This method combines .StartListening() and .StartHandling().
+        /// </summary>
+        public void Start()
+        {
+            StartListening();
+            StartHandling();
+        }
+
+        /// <summary>
         /// Declares an Exchange (as configured in the BusOptions). For each EventHander that is configured for this host, a queue (as configured in the EventHandlerAttribute) is opened and bound to this exchange. 
         /// From this moment in time, all relevant events are captured in the queue(s). 
-        /// The event are only processed after the .Start() method has been called.
+        /// The event are only processed after the .StartHandling() method has been called.
         /// </summary>
         public void StartListening()
         {

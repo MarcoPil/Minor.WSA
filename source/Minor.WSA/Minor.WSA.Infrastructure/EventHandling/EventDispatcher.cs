@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace Minor.WSA.Infrastructure
 {
-    public class EventDispatcher
+    public class EventDispatcher : IEventDispatcher
     {
         private IFactory factory;
         private MethodInfo method;
