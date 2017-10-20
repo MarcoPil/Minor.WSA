@@ -25,13 +25,12 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
             var eventQueue = new TestEventQueue(queueName, topicExpressions);
             _namedQueueus.Add(queueName, eventQueue);
         }
-        public void PublishRawMessage(long timestamp, string routingKey, string correlationId, string eventType, string jsonMessage)
+        public void PublishEventMessage(EventMessage eventMessage)
         {
-            var eventMessage = new EventMessage(timestamp, routingKey, correlationId, eventType, jsonMessage);
             LoggedMessages.Add(eventMessage);
             foreach (var eventQueue in _namedQueueus.Values)
             {
-                eventQueue.EnqueueIfMatches(routingKey, eventMessage);
+                eventQueue.EnqueueIfMatches(eventMessage.RoutingKey, eventMessage);
             }
         }
 

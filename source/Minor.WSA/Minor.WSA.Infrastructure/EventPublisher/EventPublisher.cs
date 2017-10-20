@@ -36,13 +36,14 @@ namespace Minor.WSA.Infrastructure
         /// <param name="domainEvent">The domain event to be published. </param>
         public void Publish(DomainEvent domainEvent)
         {
-            BusOptions.Provider.PublishRawMessage(
+            var eventMessage = new EventMessage (
                 timestamp:     domainEvent.Timestamp, 
                 routingKey:    domainEvent.RoutingKey,
                 correlationId: domainEvent.ID.ToString(),
                 eventType:     domainEvent.GetType().FullName, 
                 jsonMessage:   JsonConvert.SerializeObject(domainEvent)
             );
+            BusOptions.Provider.PublishEventMessage(eventMessage);
         }
     }
 }

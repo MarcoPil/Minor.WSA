@@ -41,18 +41,18 @@ namespace Minor.WSA.Infrastructure
                                     durable: false, autoDelete: false, arguments: null);
         }
 
-        public void PublishRawMessage(long timestamp, string routingKey, string correlationId, string eventType, string jsonMessage)
+        public void PublishEventMessage(EventMessage eventMessage)
         {
             // set metadata
             var props = Channel.CreateBasicProperties();
-            props.Timestamp = new AmqpTimestamp(timestamp);
-            props.CorrelationId = correlationId;
-            props.Type = eventType;
+            props.Timestamp = new AmqpTimestamp(eventMessage.Timestamp);
+            props.CorrelationId = eventMessage.CorrelationId;
+            props.Type = eventMessage.EventType;
             // set payload
-            var buffer = Encoding.UTF8.GetBytes(jsonMessage);
+            var buffer = Encoding.UTF8.GetBytes(eventMessage.JsonMessage);
             // publish event
             Channel.BasicPublish(exchange: busOptions.ExchangeName,
-                                     routingKey: routingKey,
+                                     routingKey: eventMessage.RoutingKey,
                                      basicProperties: props,
                                      body: buffer);
         }
