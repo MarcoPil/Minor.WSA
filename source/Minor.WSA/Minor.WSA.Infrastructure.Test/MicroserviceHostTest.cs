@@ -17,7 +17,7 @@ public class MicroserviceHostTest
     public void SetsBusoptions()
     {
         var busOptions = new BusOptions(hostName: "127.0.0.1");
-        using (var target = new MicroserviceHost(null, busOptions))
+        using (var target = new MicroserviceHost(null, null, busOptions))
         {
             var result = target.BusOptions;
 
@@ -35,9 +35,10 @@ public class MicroserviceHostTest
         var mock1 = new Mock<IEventListener>(MockBehavior.Loose);
         var mock2 = new Mock<IEventListener>(MockBehavior.Loose);
         var eventListeners = new List<IEventListener> { mock1.Object, mock2.Object };
+        var controllers = new List<Controller>();
 
         var busOptions = new BusOptions(exchangeName: "MicroserviceHostTest01");
-        using (var target = new MicroserviceHost(eventListeners, busOptions))
+        using (var target = new MicroserviceHost(eventListeners, controllers, busOptions))
         {
             // Act
             target.StartListening();
@@ -57,9 +58,10 @@ public class MicroserviceHostTest
         var mock1 = new Mock<IEventListener>(MockBehavior.Loose);
         var mock2 = new Mock<IEventListener>(MockBehavior.Loose);
         var eventListeners = new List<IEventListener> { mock1.Object, mock2.Object };
+        var controllers = new List<Controller>();
 
         var busOptions = new BusOptions(exchangeName: "MicroserviceHostTest02");
-        using (var target = new MicroserviceHost(eventListeners, busOptions))
+        using (var target = new MicroserviceHost(eventListeners, controllers, busOptions))
         {
             target.StartListening();
 
@@ -91,9 +93,10 @@ public class MicroserviceHostTest
     public void CannotStartHandlingBeforeStartListening()
     {
         var eventListeners = new List<IEventListener>();
+        var controllers = new List<Controller>();
 
         var busOptions = new BusOptions(exchangeName: "MicroserviceHostTest03");
-        using (var target = new MicroserviceHost(eventListeners, busOptions))
+        using (var target = new MicroserviceHost(eventListeners, controllers, busOptions))
         {
             // Act
             Action action = () => target.StartHandling();

@@ -13,19 +13,24 @@ namespace Minor.WSA.Infrastructure
     public class MicroserviceHostBuilder
     {
         private IServiceCollection _serviceCollection;
+
         private Dictionary<Type, IFactory> _factories;
         private List<EventListener> _eventListeners;
+        private List<Controller> _controllers;
         private BusOptions _busOptions;
 
         public IEnumerable<string> Factories => _factories.Keys.Select(t => t.ToString());
         public IEnumerable<EventListener> EventListeners => _eventListeners;
+        public IEnumerable<Controller> Controllers => _controllers;
         public IServiceCollection ServiceProvider => _serviceCollection;
+
 
         public MicroserviceHostBuilder()
         {
             _serviceCollection = new ServiceCollection();
             _factories = new Dictionary<Type, IFactory>();
             _eventListeners = new List<EventListener>();
+            _controllers = new List<Controller>();
             _busOptions = default(BusOptions);
         }
 
@@ -37,7 +42,7 @@ namespace Minor.WSA.Infrastructure
 
         public MicroserviceHostBuilder UseConventions()
         {
-            FindEventListeners();
+            FindEventListenersAndControllers();
             return this;        // for call chaining
         }
 
@@ -47,7 +52,20 @@ namespace Minor.WSA.Infrastructure
             return this;        // for call chaining
         }
 
-        private void FindEventListeners()
+        public MicroserviceHostBuilder AddController<T>()
+        {
+            FindControllers(typeof(T));
+            return this;        // for call chaining
+        }
+
+        public MicroserviceHost CreateHost()
+        {
+            var host = new MicroserviceHost(EventListeners, Controllers, _busOptions);
+
+            return host;
+        }
+
+        private void FindEventListenersAndControllers()
         {
             var thisAssembly = this.GetType().GetTypeInfo().Assembly;
             var referencingAssemblies = GetRefencingAssemblies(thisAssembly);
@@ -55,7 +73,17 @@ namespace Minor.WSA.Infrastructure
             foreach (var type in referencingAssemblies.SelectMany(a => a.GetTypes()))
             {
                 FindEventListeners(type);
+                FindControllers(type);
             }
+        }
+
+        private IEnumerable<Assembly> GetRefencingAssemblies(Assembly assembly)
+        {
+            var assemblyName = assembly.FullName;
+            return from library in DependencyContext.Default.RuntimeLibraries
+                   where assemblyName.StartsWith(library.Name)
+                         || library.Dependencies.Any(d => assemblyName.StartsWith(d.Name))
+                   select Assembly.Load(new AssemblyName(library.Name));
         }
 
         private void FindEventListeners(Type type)
@@ -69,13 +97,15 @@ namespace Minor.WSA.Infrastructure
             }
         }
 
-        private IEnumerable<Assembly> GetRefencingAssemblies(Assembly assembly)
+        private void FindControllers(Type type)
         {
-            var assemblyName = assembly.FullName;
-            return from library in DependencyContext.Default.RuntimeLibraries
-                   where assemblyName.StartsWith(library.Name)
-                         || library.Dependencies.Any(d => assemblyName.StartsWith(d.Name))
-                   select Assembly.Load(new AssemblyName(library.Name));
+            var controllerAttr = type.GetTypeInfo().GetCustomAttribute<ControllerAttribute>();
+            if (controllerAttr != null)
+            {
+                var factory = new TransientFactory(_serviceCollection, type);
+                _factories.Add(type, factory);
+                _controllers.Add(CreateController(type, controllerAttr.QueueName, factory));
+            }
         }
 
         private EventListener CreateEventListener(Type type, string queueName, IFactory factory)
@@ -85,7 +115,7 @@ namespace Minor.WSA.Infrastructure
             var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
-                var (topicExpression, dispatcher) = CreateEventHandler(type, factory, method);
+                var (topicExpression, dispatcher) = CreateEventHandlerForMethod(type, factory, method);
                 if (topicExpression != null)
                 {
                     if (eventHandlers.ContainsKey(topicExpression))
@@ -102,7 +132,46 @@ namespace Minor.WSA.Infrastructure
             return new EventListener(queueName, eventHandlers);
         }
 
-        private static (string, IEventDispatcher) CreateEventHandler(Type type, IFactory factory, MethodInfo method)
+        private Controller CreateController(Type type, string queueName, TransientFactory factory)
+        {
+            var commandHandlers = new Dictionary<string, IEventDispatcher>();
+
+            var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+            foreach (var method in methods)
+            {
+                var (command, dispatcher) = CreateCommandHandlerForMethod(type, factory, method);
+                if (command != null)
+                {
+                    if (commandHandlers.ContainsKey(command))
+                    {
+                        throw new MicroserviceConfigurationException($"Two commands cannot be exactly identical. The command '{command}' has already been registered.");
+                    }
+                    else
+                    {
+                        commandHandlers.Add(command, dispatcher);
+                    }
+                }
+
+            }
+            return new Controller(queueName, commandHandlers);
+        }
+
+        private static (string, IEventDispatcher) CreateCommandHandlerForMethod(Type type, IFactory factory, MethodInfo method)
+        {
+            var executeAttr = method.GetCustomAttribute<ExecuteAttribute>();
+
+            if (method.GetParameters().Length == 1 &&
+                (method.Name == "Execute" || executeAttr != null))
+            {
+                var paramType = method.GetParameters().Single().ParameterType;
+                var commandType = executeAttr?.CommandTypeName  ??  paramType.ToString();
+                var dispatcher = new EventDispatcher(factory, method, paramType);
+                return (commandType, dispatcher);
+            }
+            return (null, null);
+        }
+
+        private static (string, IEventDispatcher) CreateEventHandlerForMethod(Type type, IFactory factory, MethodInfo method)
         {
             if (method.GetParameters().Length == 1)
             {
@@ -150,12 +219,6 @@ namespace Minor.WSA.Infrastructure
             return topicExpression;
         }
 
-        public MicroserviceHost CreateHost()
-        {
-            var host = new MicroserviceHost(EventListeners, _busOptions);
-
-            return host;
-        }
 
     }
 }

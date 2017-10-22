@@ -11,11 +11,15 @@ namespace Minor.WSA.Infrastructure
     {
         private bool _isListening;
         public IEnumerable<IEventListener> EventListeners { get; }
+        public IEnumerable<Controller> Controllers { get; set; }
 
-        public MicroserviceHost(IEnumerable<IEventListener> eventListeners, BusOptions busOptions = default(BusOptions)) 
+        public MicroserviceHost(IEnumerable<IEventListener> eventListeners,
+                                IEnumerable<Controller> controllers,
+                                BusOptions busOptions = default(BusOptions)) 
             : base(busOptions)
         {
             EventListeners = eventListeners;
+            Controllers = controllers;
             _isListening = false;
         }
 
