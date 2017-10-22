@@ -14,8 +14,8 @@ namespace Minor.WSA.Infrastructure
         void StartReceivingEvents(string queueName, EventReceivedCallback callback);
 
         Task<CommandResponseMessage> SendCommandAsync(CommandRequestMessage command);
+        void CreateQueue(string queueName);
         void StartReceivingCommands(string queueName, CommandReceivedCallback callback);
-
         void Dispose();
     }
 

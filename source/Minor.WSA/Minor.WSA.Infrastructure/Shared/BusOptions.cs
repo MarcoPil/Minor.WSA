@@ -7,7 +7,7 @@ namespace Minor.WSA.Infrastructure
     /// <summary>
     /// The BusOptions are used for configuring a connection to RabbitMQ.
     /// </summary>
-    public class BusOptions
+    public class BusOptions : IBusOptions
     {
         /// <summary>
         /// Default: "WSA.DefaultEventBus"

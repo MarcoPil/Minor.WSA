@@ -114,6 +114,10 @@ namespace Minor.WSA.Infrastructure
                                   consumer: consumer);
         }
 
+        public void CreateQueue(string queueName)
+        {
+            throw new NotImplementedException();
+        }
         public Task<CommandResponseMessage> SendCommandAsync(CommandRequestMessage command)
         {
             // set up for receiving the response
@@ -198,5 +202,6 @@ namespace Minor.WSA.Infrastructure
             Channel?.Dispose();
             _connection?.Dispose();
         }
+
     }
 }

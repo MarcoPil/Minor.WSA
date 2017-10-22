@@ -40,6 +40,11 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
             _namedQueueus[queueName].StartDequeueing(callback);
         }
 
+        public void CreateQueue(string queueName)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<CommandResponseMessage> SendCommandAsync(CommandRequestMessage command)
         {
             throw new NotImplementedException();

@@ -9,8 +9,9 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
         public IEnumerable<EventMessage> LoggedMessages { get; }
         public TestBusOptions()
         {
-            Provider = new TestBusProvider();
-            LoggedMessages = (Provider as TestBusProvider).LoggedMessages;
+            var testBusProvider = new TestBusProvider();
+            Provider = testBusProvider;
+            LoggedMessages = testBusProvider.LoggedMessages;
         }
     }
 }

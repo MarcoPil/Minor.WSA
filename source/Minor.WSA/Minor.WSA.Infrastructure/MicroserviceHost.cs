@@ -11,10 +11,10 @@ namespace Minor.WSA.Infrastructure
     {
         private bool _isListening;
         public IEnumerable<IEventListener> EventListeners { get; }
-        public IEnumerable<Controller> Controllers { get; set; }
+        public IEnumerable<IController> Controllers { get; set; }
 
         public MicroserviceHost(IEnumerable<IEventListener> eventListeners,
-                                IEnumerable<Controller> controllers,
+                                IEnumerable<IController> controllers,
                                 BusOptions busOptions = default(BusOptions)) 
             : base(busOptions)
         {
@@ -46,6 +46,10 @@ namespace Minor.WSA.Infrastructure
             {
                 listener.OpenEventQueue(BusOptions);
             }
+            foreach (var controller in Controllers)
+            {
+                controller.OpenCommandQueue(BusOptions);
+            }
             _isListening = true;
         }
 
@@ -63,7 +67,11 @@ namespace Minor.WSA.Infrastructure
                 foreach (var listener in EventListeners)
                 {
                     listener.StartHandling();
-                } 
+                }
+                foreach (var controller in Controllers)
+                {
+                    controller.StartHandling();
+                }
             }
         }
     }

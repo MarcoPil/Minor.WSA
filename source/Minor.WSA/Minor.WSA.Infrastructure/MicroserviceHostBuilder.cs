@@ -134,7 +134,7 @@ namespace Minor.WSA.Infrastructure
 
         private Controller CreateController(Type type, string queueName, TransientFactory factory)
         {
-            var commandHandlers = new Dictionary<string, IEventDispatcher>();
+            var commandHandlers = new Dictionary<string, ICommandHandler>();
 
             var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
@@ -156,7 +156,7 @@ namespace Minor.WSA.Infrastructure
             return new Controller(queueName, commandHandlers);
         }
 
-        private static (string, IEventDispatcher) CreateCommandHandlerForMethod(Type type, IFactory factory, MethodInfo method)
+        private static (string, ICommandHandler) CreateCommandHandlerForMethod(Type type, IFactory factory, MethodInfo method)
         {
             var executeAttr = method.GetCustomAttribute<ExecuteAttribute>();
 
@@ -165,7 +165,7 @@ namespace Minor.WSA.Infrastructure
             {
                 var paramType = method.GetParameters().Single().ParameterType;
                 var commandType = executeAttr?.CommandTypeName  ??  paramType.ToString();
-                var dispatcher = new EventDispatcher(factory, method, paramType);
+                var dispatcher = new CommandHandler(factory, method, paramType);
                 return (commandType, dispatcher);
             }
             return (null, null);

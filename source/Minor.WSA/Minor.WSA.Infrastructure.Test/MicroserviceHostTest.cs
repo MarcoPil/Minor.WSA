@@ -1,5 +1,6 @@
 ﻿using Minor.WSA.Infrastructure;
 using Minor.WSA.Infrastructure.Shared;
+using Minor.WSA.Infrastructure.Shared.TestBus;
 using Minor.WSA.Infrastructure.Test;
 using Minor.WSA.Infrastructure.Test.EventHandlerTests;
 using Moq;
@@ -30,37 +31,54 @@ public class MicroserviceHostTest
     }
 
     [Fact]
-    public void Open_CallsOpenEventQueueOnOlisteners()
+    public void StartListening_CallsOpenEventQueueOnListeners()
     {
         var mock1 = new Mock<IEventListener>(MockBehavior.Loose);
         var mock2 = new Mock<IEventListener>(MockBehavior.Loose);
         var eventListeners = new List<IEventListener> { mock1.Object, mock2.Object };
-        var controllers = new List<Controller>();
+        var controllers = new List<IController>();
 
-        var busOptions = new BusOptions(exchangeName: "MicroserviceHostTest01");
+        var busOptions = new TestBusOptions();
         using (var target = new MicroserviceHost(eventListeners, controllers, busOptions))
         {
             // Act
             target.StartListening();
 
             // Assert
-            mock1.Verify(el => el.OpenEventQueue(It.IsAny<BusOptions>()), Times.Once);
-            mock2.Verify(el => el.OpenEventQueue(It.IsAny<BusOptions>()), Times.Once);
+            mock1.Verify(el => el.OpenEventQueue(busOptions), Times.Once);
+            mock2.Verify(el => el.OpenEventQueue(busOptions), Times.Once);
+        }
+    }
+    [Fact]
+    public void StartListening_CallsOpenCommandQueueOnControllers()
+    {
+        var eventListeners = new List<IEventListener>();
+        var mock1 = new Mock<IController>(MockBehavior.Loose);
+        var mock2 = new Mock<IController>(MockBehavior.Loose);
+        var controllers = new List<IController>() { mock1.Object, mock2.Object };
+
+        var busOptions = new TestBusOptions();
+        using (var target = new MicroserviceHost(eventListeners, controllers, busOptions))
+        {
+            // Act
+            target.StartListening();
+
+            // Assert
+            mock1.Verify(el => el.OpenCommandQueue(busOptions), Times.Once);
+            mock2.Verify(el => el.OpenCommandQueue(busOptions), Times.Once);
         }
 
-        RabbitTestHelp.DeleteExchange(busOptions);
     }
 
-
     [Fact]
-    public void Start_CallsOpenEventQueueOnOlisteners()
+    public void StartHandling_CallsStartHandlingOnListeners()
     {
         var mock1 = new Mock<IEventListener>(MockBehavior.Loose);
         var mock2 = new Mock<IEventListener>(MockBehavior.Loose);
         var eventListeners = new List<IEventListener> { mock1.Object, mock2.Object };
-        var controllers = new List<Controller>();
+        var controllers = new List<IController>();
 
-        var busOptions = new BusOptions(exchangeName: "MicroserviceHostTest02");
+        var busOptions = new TestBusOptions();
         using (var target = new MicroserviceHost(eventListeners, controllers, busOptions))
         {
             target.StartListening();
@@ -72,8 +90,29 @@ public class MicroserviceHostTest
             mock1.Verify(el => el.StartHandling(), Times.Once);
             mock2.Verify(el => el.StartHandling(), Times.Once);
         }
+    }
 
-        RabbitTestHelp.DeleteExchange(busOptions);
+
+    [Fact]
+    public void StartHandling_CallsStartHandlingOnControllers()
+    {
+        var eventListeners = new List<IEventListener>();
+        var mock1 = new Mock<IController>(MockBehavior.Loose);
+        var mock2 = new Mock<IController>(MockBehavior.Loose);
+        var controllers = new List<IController> { mock1.Object, mock2.Object };
+
+        var busOptions = new TestBusOptions();
+        using (var target = new MicroserviceHost(eventListeners, controllers, busOptions))
+        {
+            target.StartListening();
+
+            // Act
+            target.StartHandling();
+
+            // Assert
+            mock1.Verify(el => el.StartHandling(), Times.Once);
+            mock2.Verify(el => el.StartHandling(), Times.Once);
+        }
     }
 
     [Fact]
