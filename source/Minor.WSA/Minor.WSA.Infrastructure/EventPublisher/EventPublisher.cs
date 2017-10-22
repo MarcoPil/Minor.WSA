@@ -43,7 +43,7 @@ namespace Minor.WSA.Infrastructure
                 eventType:     domainEvent.GetType().FullName, 
                 jsonMessage:   JsonConvert.SerializeObject(domainEvent)
             );
-            BusOptions.Provider.PublishEventMessage(eventMessage);
+            BusOptions.Provider.PublishEvent(eventMessage);
         }
     }
 }

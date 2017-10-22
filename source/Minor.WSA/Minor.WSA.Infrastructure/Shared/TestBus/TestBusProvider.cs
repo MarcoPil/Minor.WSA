@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Minor.WSA.Infrastructure.Shared.TestBus
 {
@@ -25,7 +26,7 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
             var eventQueue = new TestEventQueue(queueName, topicExpressions);
             _namedQueueus.Add(queueName, eventQueue);
         }
-        public void PublishEventMessage(EventMessage eventMessage)
+        public void PublishEvent(EventMessage eventMessage)
         {
             LoggedMessages.Add(eventMessage);
             foreach (var eventQueue in _namedQueueus.Values)
@@ -34,9 +35,19 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
             }
         }
 
-        public void StartReceiving(string queueName, EventReceivedCallback callback)
+        public void StartReceivingEvents(string queueName, EventReceivedCallback callback)
         {
             _namedQueueus[queueName].StartDequeueing(callback);
+        }
+
+        public Task<CommandResponseMessage> SendCommandAsync(CommandRequestMessage command)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void StartReceivingCommands(string queueName, CommandReceivedCallback callback)
+        {
+            throw new NotImplementedException();
         }
 
         public void Dispose()

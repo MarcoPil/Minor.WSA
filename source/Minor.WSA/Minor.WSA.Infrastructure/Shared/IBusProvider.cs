@@ -1,16 +1,24 @@
-﻿using System;
+﻿using Minor.WSA.Infrastructure.Shared;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Minor.WSA.Infrastructure
 {
     public interface IBusProvider
     {
         void CreateConnection();
-        void PublishEventMessage(EventMessage eventMessage);
+
+        void PublishEvent(EventMessage eventMessage);
         void CreateQueueWithTopics(string queueName, IEnumerable<string> topicExpressions);
-        void StartReceiving(string queueName, EventReceivedCallback callback);
+        void StartReceivingEvents(string queueName, EventReceivedCallback callback);
+
+        Task<CommandResponseMessage> SendCommandAsync(CommandRequestMessage command);
+        void StartReceivingCommands(string queueName, CommandReceivedCallback callback);
+
         void Dispose();
     }
 
     public delegate void EventReceivedCallback(EventMessage eventMessage);
+    public delegate CommandResultMessage CommandReceivedCallback(CommandReceivedMessage eventMessage);
 }

@@ -25,4 +25,9 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Commands\Commander\" />
+    <Folder Include="Commands\Controller\" />
+  </ItemGroup>
+
 </Project>

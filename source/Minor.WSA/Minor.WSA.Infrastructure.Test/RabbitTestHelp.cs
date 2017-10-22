@@ -28,6 +28,14 @@ namespace Minor.WSA.Infrastructure.Test
             }
         }
 
-
+        internal static void DeleteQueueAndExchange(BusOptions busOptions, string queueName)
+        {
+            using (var connection = CreateFactoryFrom(busOptions).CreateConnection())
+            using (var channel = connection.CreateModel())
+            {
+                channel.QueueDeleteNoWait(queueName);
+                channel.ExchangeDeleteNoWait(busOptions.ExchangeName);
+            }
+        }
     }
 }

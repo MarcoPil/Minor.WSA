@@ -47,7 +47,7 @@ namespace Minor.WSA.Infrastructure
         /// </summary>
         public virtual void StartHandling()
         {
-            _busOptions.Provider.StartReceiving(QueueName, EventReceived);
+            _busOptions.Provider.StartReceivingEvents(QueueName, EventReceived);
         }
 
         protected virtual void EventReceived(EventMessage eventMessage)
