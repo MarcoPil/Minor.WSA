@@ -20,5 +20,5 @@ namespace Minor.WSA.Infrastructure
     }
 
     public delegate void EventReceivedCallback(EventMessage eventMessage);
-    public delegate CommandResultMessage CommandReceivedCallback(CommandReceivedMessage eventMessage);
+    public delegate CommandResultMessage CommandReceivedCallback(CommandReceivedMessage commandReceivedMessage);
 }

@@ -2,5 +2,6 @@
 {
     public interface ICommandHandler
     {
+        CommandResultMessage DispatchCommand(CommandReceivedMessage commandReceivedMessage);
     }
 }

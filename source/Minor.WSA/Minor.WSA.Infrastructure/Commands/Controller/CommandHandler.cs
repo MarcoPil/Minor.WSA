@@ -15,5 +15,10 @@ namespace Minor.WSA.Infrastructure
             this.method = method;
             this.paramType = paramType;
         }
+
+        public CommandResultMessage DispatchCommand(CommandReceivedMessage commandReceivedMessage)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

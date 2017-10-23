@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace Minor.WSA.Infrastructure
 {
@@ -23,7 +25,38 @@ namespace Minor.WSA.Infrastructure
 
         public void StartHandling()
         {
-            throw new System.NotImplementedException();
+            BusOptions.Provider.StartReceivingCommands(QueueName, CommandReceived);
+        }
+
+        protected virtual CommandResultMessage CommandReceived(CommandReceivedMessage commandReceivedMessage)
+        {
+            CommandResultMessage result;
+            var commandType = commandReceivedMessage.CommandType;
+
+            if (_commandHandlers.ContainsKey(commandType))
+            {
+                try
+                {
+                    result = _commandHandlers[commandType].DispatchCommand(commandReceivedMessage);
+                }
+                catch (FunctionalException ex)
+                {
+                    var resultJson = JsonConvert.SerializeObject(ex.ErrorList);
+                    result = new CommandResultMessage("FunctionalException", resultJson);
+                }
+                catch
+                {
+                    var error = new TechnicalError(501, $"Internal Server Error");
+                    result = new CommandResultMessage("TechnicalError", JsonConvert.SerializeObject(error));
+                }
+            }
+            else
+            {
+                var error = new TechnicalError(404, $"Cannot Execute '{commandType}'. Command not found.");
+                result = new CommandResultMessage("TechnicalError", JsonConvert.SerializeObject(error));
+            }
+
+            return result;
         }
     }
 }

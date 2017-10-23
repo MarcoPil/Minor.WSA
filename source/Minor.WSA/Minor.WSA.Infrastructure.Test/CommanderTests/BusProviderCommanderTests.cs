@@ -237,7 +237,7 @@ public class BusProviderCommanderTests
 
                 CommandReceivedCallback receivingCommandCallback = (CommandReceivedMessage crm) =>
                 {
-                    var commandResultMessage = new CommandResultMessage("{\"answerJson\":true}");
+                    var commandResultMessage = new CommandResultMessage("ResultType", "{\"answerJson\":true}");
                     return commandResultMessage;
                 };
                 target.StartReceivingCommands(serverQueueName, receivingCommandCallback);

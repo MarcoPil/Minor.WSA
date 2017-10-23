@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Minor.WSA.Infrastructure.Shared
+namespace Minor.WSA.Infrastructure
 {
     public class MicroserviceException : Exception
     {
