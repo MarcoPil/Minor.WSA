@@ -4,7 +4,7 @@ namespace Minor.WSA.Infrastructure
 {
     public interface IController
     {
-        IEnumerable<string> Commands { get; }
+        IEnumerable<KeyValuePair<string, ICommandHandler>> Commands { get; }
         string QueueName { get; }
 
         void OpenCommandQueue(BusOptions busOptions);

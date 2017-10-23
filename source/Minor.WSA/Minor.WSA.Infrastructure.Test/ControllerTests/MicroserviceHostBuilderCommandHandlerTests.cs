@@ -50,7 +50,11 @@ public class MicroserviceHostBuilderControllerTests
         target.AddController<Test2Controller>();
 
         var controller = target.Controllers.First();
-        Assert.Contains(typeof(Test2Command).ToString(), controller.Commands);
+        var handler = controller.Commands.First();
+        Assert.Equal(typeof(Test2Command).ToString(), handler.Key);
+        Assert.Equal(typeof(Test2Command), handler.Value.ParamType);
+        Assert.Equal(typeof(string), handler.Value.ReturnType);
+        Assert.Equal("Execute", handler.Value.Method.Name);
     }
     #region test dummies
     [Controller("Test2QueueName")]
@@ -74,7 +78,7 @@ public class MicroserviceHostBuilderControllerTests
         target.AddController<Test3Controller>();
 
         var controller = target.Controllers.First();
-        Assert.Contains(typeof(Test3Command).ToString(), controller.Commands);
+        Assert.Contains(controller.Commands, ch => ch.Key == typeof(Test3Command).ToString());
     }
     #region test dummies
     [Controller("Test3QueueName")]
@@ -142,7 +146,11 @@ public class MicroserviceHostBuilderControllerTests
         target.AddController<Test5Controller>();
 
         var controller = target.Controllers.First();
-        Assert.Contains("TriggeredFromOtherCommand", controller.Commands);
+        var handler = controller.Commands.First();
+        Assert.Equal("TriggeredFromOtherCommand", handler.Key);
+        Assert.Equal(typeof(Test5Command), handler.Value.ParamType);
+        Assert.Equal(typeof(string), handler.Value.ReturnType);
+        Assert.Equal("Handle", handler.Value.Method.Name);
     }
     #region test dummies
     [Controller("Test5QueueName")]
@@ -167,11 +175,12 @@ public class MicroserviceHostBuilderControllerTests
         target.AddController<Test6Controller>();
 
         var controller = target.Controllers.First();
-        Assert.Contains(typeof(Test2Command).ToString(), controller.Commands);
-        Assert.Contains(typeof(Test3Command).ToString(), controller.Commands);
-        Assert.Contains(typeof(Test4Command).ToString(), controller.Commands);
-        Assert.Contains("TriggeredFromOtherCommand", controller.Commands);
-        Assert.Contains("TriggeredFromYetAnotherCommand", controller.Commands);
+        Assert.Equal(5, controller.Commands.Count());
+        Assert.Contains(controller.Commands, ch => ch.Key == typeof(Test2Command).ToString());
+        Assert.Contains(controller.Commands, ch => ch.Key == typeof(Test3Command).ToString());
+        Assert.Contains(controller.Commands, ch => ch.Key == typeof(Test4Command).ToString());
+        Assert.Contains(controller.Commands, ch => ch.Key == "TriggeredFromOtherCommand");
+        Assert.Contains(controller.Commands, ch => ch.Key == "TriggeredFromYetAnotherCommand");
     }
     #region test dummies
     [Controller("Test6QueueName")]

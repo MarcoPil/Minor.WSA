@@ -8,7 +8,7 @@ namespace Minor.WSA.Infrastructure
     {
         private Dictionary<string, ICommandHandler> _commandHandlers; //    string = commandName
         public string QueueName { get; }
-        public IEnumerable<string> Commands => _commandHandlers.Keys;
+        public IEnumerable<KeyValuePair<string, ICommandHandler>> Commands => _commandHandlers;
         public BusOptions BusOptions { get; private set; }
 
         public Controller(string queueName, Dictionary<string, ICommandHandler> commandHandlers)

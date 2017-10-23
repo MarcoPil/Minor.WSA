@@ -191,6 +191,7 @@ public class BusProviderCommanderTests
             {
                 // Arrange
                 target.CreateConnection();
+                target.CreateQueue(serverQueueName);
                 CommandReceivedMessage commandReceivedMessage = null;
                 var handle = new AutoResetEvent(false);
 
@@ -234,6 +235,7 @@ public class BusProviderCommanderTests
             {
                 // Arrange
                 target.CreateConnection();
+                target.CreateQueue(serverQueueName);
 
                 CommandReceivedCallback receivingCommandCallback = (CommandReceivedMessage crm) =>
                 {

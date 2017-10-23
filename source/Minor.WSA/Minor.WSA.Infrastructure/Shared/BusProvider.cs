@@ -116,7 +116,9 @@ namespace Minor.WSA.Infrastructure
 
         public void CreateQueue(string queueName)
         {
-            throw new NotImplementedException();
+            Channel.QueueDeclare(queue: queueName, durable: false, exclusive: false,
+                                 autoDelete: false, arguments: null);
+            Channel.BasicQos(0, 1, false);
         }
         public Task<CommandResponseMessage> SendCommandAsync(CommandRequestMessage command)
         {
@@ -163,9 +165,6 @@ namespace Minor.WSA.Infrastructure
 
         public void StartReceivingCommands(string queueName, CommandReceivedCallback callback)
         {
-            Channel.QueueDeclare(queue: queueName, durable: false, exclusive: false,
-                                 autoDelete: false, arguments: null);
-            Channel.BasicQos(0, 1, false);
             var consumer = new EventingBasicConsumer(Channel);
             Channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
 

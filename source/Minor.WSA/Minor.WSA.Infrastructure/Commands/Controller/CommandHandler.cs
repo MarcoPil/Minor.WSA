@@ -1,24 +1,34 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Reflection;
 
 namespace Minor.WSA.Infrastructure
 {
     public class CommandHandler : ICommandHandler
     {
-        private IFactory factory;
-        private MethodInfo method;
-        private Type paramType;
+        public IFactory Factory { get; }
+        public MethodInfo Method { get; }
+        public Type ReturnType { get; }
+        public Type ParamType { get; }
 
-        public CommandHandler(IFactory factory, MethodInfo method, Type paramType)
+        public CommandHandler(IFactory factory, MethodInfo method, Type returnType, Type paramType)
         {
-            this.factory = factory;
-            this.method = method;
-            this.paramType = paramType;
+            Factory = factory;
+            Method = method;
+            ReturnType = returnType;
+            ParamType = paramType;
         }
 
         public CommandResultMessage DispatchCommand(CommandReceivedMessage commandReceivedMessage)
         {
-            throw new NotImplementedException();
+            var paramObj = JsonConvert.DeserializeObject(commandReceivedMessage.JsonMessage, ParamType);
+            var instance = Factory.GetInstance();
+
+            var result = Method.Invoke(instance, new object[] { paramObj });
+
+            var resultType = ReturnType.ToString();
+            var resultJson = JsonConvert.SerializeObject(result);
+            return new CommandResultMessage(resultType, resultJson);
         }
     }
 }

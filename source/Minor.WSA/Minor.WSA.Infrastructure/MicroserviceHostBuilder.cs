@@ -163,9 +163,10 @@ namespace Minor.WSA.Infrastructure
             if (method.GetParameters().Length == 1 &&
                 (method.Name == "Execute" || executeAttr != null))
             {
+                var returnType = method.ReturnType;
                 var paramType = method.GetParameters().Single().ParameterType;
                 var commandType = executeAttr?.CommandTypeName  ??  paramType.ToString();
-                var dispatcher = new CommandHandler(factory, method, paramType);
+                var dispatcher = new CommandHandler(factory, method, returnType, paramType);
                 return (commandType, dispatcher);
             }
             return (null, null);
