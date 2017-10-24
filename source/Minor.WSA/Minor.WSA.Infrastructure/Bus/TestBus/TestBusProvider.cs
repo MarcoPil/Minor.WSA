@@ -8,14 +8,14 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
 {
     public class TestBusProvider : IBusProvider
     {
-        private Dictionary<string, TestEventQueue> _namedQueueus;
+        private Dictionary<string, TestEventQueue> _namedEventQueues;
 
-        public List<EventMessage> LoggedMessages { get; }
+        public List<EventMessage> LoggedEventMessages { get; }
 
         public TestBusProvider()
         {
-            _namedQueueus = new Dictionary<string, TestEventQueue>();
-            LoggedMessages = new List<EventMessage>();
+            _namedEventQueues = new Dictionary<string, TestEventQueue>();
+            LoggedEventMessages = new List<EventMessage>();
         }
         public void CreateConnection()
         {
@@ -24,12 +24,12 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
         public void CreateQueueWithTopics(string queueName, IEnumerable<string> topicExpressions)
         {
             var eventQueue = new TestEventQueue(queueName, topicExpressions);
-            _namedQueueus.Add(queueName, eventQueue);
+            _namedEventQueues.Add(queueName, eventQueue);
         }
         public void PublishEvent(EventMessage eventMessage)
         {
-            LoggedMessages.Add(eventMessage);
-            foreach (var eventQueue in _namedQueueus.Values)
+            LoggedEventMessages.Add(eventMessage);
+            foreach (var eventQueue in _namedEventQueues.Values)
             {
                 eventQueue.EnqueueIfMatches(eventMessage.RoutingKey, eventMessage);
             }
@@ -37,7 +37,7 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
 
         public void StartReceivingEvents(string queueName, EventReceivedCallback callback)
         {
-            _namedQueueus[queueName].StartDequeueing(callback);
+            _namedEventQueues[queueName].StartDequeueing(callback);
         }
 
         public void CreateQueue(string queueName)

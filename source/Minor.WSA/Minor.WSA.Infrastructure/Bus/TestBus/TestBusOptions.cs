@@ -11,7 +11,7 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
         {
             var testBusProvider = new TestBusProvider();
             Provider = testBusProvider;
-            LoggedMessages = testBusProvider.LoggedMessages;
+            LoggedMessages = testBusProvider.LoggedEventMessages;
         }
     }
 }

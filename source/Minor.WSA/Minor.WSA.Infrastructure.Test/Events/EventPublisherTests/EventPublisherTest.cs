@@ -82,7 +82,7 @@ public class EventPublisherTest
     [Fact]
     public void DefaultBusoptions()
     {
-        using (var target = new EventPublisher())
+        using (var target = new EventPublisher(default(BusOptions)))
         {
             var result = target.BusOptions;
 

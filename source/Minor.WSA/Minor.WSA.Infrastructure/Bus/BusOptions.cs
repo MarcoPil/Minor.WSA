@@ -7,7 +7,7 @@ namespace Minor.WSA.Infrastructure
     /// <summary>
     /// The BusOptions are used for configuring a connection to RabbitMQ.
     /// </summary>
-    public class BusOptions : IBusOptions
+    public class BusOptions : IBusOptions, IDisposable
     {
         /// <summary>
         /// Default: "WSA.DefaultEventBus"
@@ -100,6 +100,11 @@ namespace Minor.WSA.Infrastructure
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this, Formatting.Indented);
+        }
+
+        public void Dispose()
+        {
+            Provider?.Dispose();
         }
     }
 }
