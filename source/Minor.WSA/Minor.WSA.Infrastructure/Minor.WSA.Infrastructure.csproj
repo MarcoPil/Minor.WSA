@@ -29,7 +29,6 @@
 
   <ItemGroup>
     <Folder Include="Commands\Commander\" />
-    <Folder Include="Errors\" />
   </ItemGroup>
 
 </Project>
