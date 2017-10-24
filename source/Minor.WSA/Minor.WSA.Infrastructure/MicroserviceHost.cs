@@ -7,17 +7,18 @@ namespace Minor.WSA.Infrastructure
     /// <summary>
     /// This core class for Microservices hosts eventhandlers (for handling events) and controllers (for handling commands).
     /// </summary>
-    public class MicroserviceHost : EventBusBase
+    public class MicroserviceHost : IDisposable
     {
         private bool _isListening;
+        public BusOptions BusOptions { get; }
         public IEnumerable<IEventListener> EventListeners { get; }
         public IEnumerable<IController> Controllers { get; set; }
 
         public MicroserviceHost(IEnumerable<IEventListener> eventListeners,
                                 IEnumerable<IController> controllers,
-                                BusOptions busOptions = default(BusOptions)) 
-            : base(busOptions)
+                                BusOptions busOptions) 
         {
+            BusOptions = busOptions ?? new BusOptions();
             EventListeners = eventListeners;
             Controllers = controllers;
             _isListening = false;
@@ -40,7 +41,7 @@ namespace Minor.WSA.Infrastructure
         /// </summary>
         public void StartListening()
         {
-            base.CreateConnection();
+            BusOptions.Provider.CreateConnection();
 
             foreach (var listener in EventListeners)
             {
@@ -73,6 +74,11 @@ namespace Minor.WSA.Infrastructure
                     controller.StartHandling();
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            BusOptions.Provider.Dispose();
         }
     }
 }

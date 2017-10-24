@@ -10,21 +10,24 @@ namespace Minor.WSA.Infrastructure
     /// An EventPublisher publishes a domain event on the event bus (configured by the BusOptions).
     /// Each EventPublisher creates its own connection to rabbitMQ.
     /// </summary>
-    public class EventPublisher : EventBusBase, IEventPublisher
+    public class EventPublisher : IEventPublisher
     {
+        public BusOptions BusOptions { get; }
+
         /// <summary>
         /// Each EventPublisher creates its own connection to rabbitMQ.
         /// </summary>
         /// <param name="options">the configuration of the RabbitMQ connection. If none are passed, the default BusOptions are being used.</param>
-        public EventPublisher(BusOptions options = default(BusOptions)) : base(options)
+        public EventPublisher(BusOptions options = default(BusOptions))
         {
+            BusOptions = options ?? new BusOptions();
             try
             {
-                CreateConnection();
+                BusOptions.Provider.CreateConnection();
             }
             catch
             {
-                Dispose();
+                BusOptions.Provider.Dispose();
                 throw;
             }
         }
@@ -44,6 +47,11 @@ namespace Minor.WSA.Infrastructure
                 jsonMessage:   JsonConvert.SerializeObject(domainEvent)
             );
             BusOptions.Provider.PublishEvent(eventMessage);
+        }
+
+        public void Dispose()
+        {
+            BusOptions.Provider.Dispose();
         }
     }
 }
