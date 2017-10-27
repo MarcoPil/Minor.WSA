@@ -55,6 +55,7 @@ public class EventListenerTest
         {
             busOptions.Provider.Dispose();
         }
+        RabbitTestHelp.DeleteQueueAndExchange(busOptions, "EventListenerTest_Q01");
     }
 
     [Fact]
@@ -97,6 +98,7 @@ public class EventListenerTest
         {
             busOptions.Provider.Dispose();
         }
+        RabbitTestHelp.DeleteQueueAndExchange(busOptions, "EventListenerTest_Q02");
     }
 
     [Fact]
@@ -142,6 +144,7 @@ public class EventListenerTest
         {
             busOptions.Provider.Dispose();
         }
+        RabbitTestHelp.DeleteQueueAndExchange(busOptions, "EventListenerTest_Q03");
     }
 
     [Fact]
@@ -185,5 +188,6 @@ public class EventListenerTest
         {
             busOptions.Provider.Dispose();
         }
+        RabbitTestHelp.DeleteQueueAndExchange(busOptions, "EventListenerTest_Q04");
     }
 }

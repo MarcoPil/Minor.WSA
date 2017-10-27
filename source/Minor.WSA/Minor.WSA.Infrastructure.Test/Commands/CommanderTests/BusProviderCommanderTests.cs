@@ -54,7 +54,6 @@ public class BusProviderCommanderTests
                 Assert.Equal("{\"testJson\":true}", Encoding.UTF8.GetString(receivedCommand.Body));
             }
         }
-
         RabbitTestHelp.DeleteQueueAndExchange(busOptions, queueName);
     }
 
@@ -191,7 +190,7 @@ public class BusProviderCommanderTests
             {
                 // Arrange
                 target.CreateConnection();
-                target.CreateQueue(serverQueueName);
+                target.CreateCommandQueue(serverQueueName);
                 CommandReceivedMessage commandReceivedMessage = null;
                 var handle = new AutoResetEvent(false);
 
@@ -235,7 +234,7 @@ public class BusProviderCommanderTests
             {
                 // Arrange
                 target.CreateConnection();
-                target.CreateQueue(serverQueueName);
+                target.CreateCommandQueue(serverQueueName);
 
                 CommandReceivedCallback receivingCommandCallback = (CommandReceivedMessage crm) =>
                 {
@@ -255,4 +254,29 @@ public class BusProviderCommanderTests
         }
         RabbitTestHelp.DeleteQueueAndExchange(busOptions, serverQueueName);
     }
+
+    [Fact]
+    public void BusProviderCannotStartReceivingCommandsFromNonExistingQueue()
+    {
+        var busOptions = new BusOptions(exchangeName: "BusProviderCannotStartReceivingCommandsFromNonExistingQueue_Ex");
+        var serverQueueName = "NonExistingQueue";
+
+        var factory = RabbitTestHelp.CreateFactoryFrom(busOptions);
+        using (var connection = factory.CreateConnection())
+        using (var channel = connection.CreateModel())
+        {
+            using (var target = new BusProvider(busOptions))
+            {
+                target.CreateConnection();
+                CommandReceivedCallback callback = (CommandReceivedMessage crm) => null;
+                // Act
+                Action action = () => target.StartReceivingCommands(serverQueueName, callback);
+
+                Assert.Throws<MicroserviceException>(action);
+            }
+        }
+        RabbitTestHelp.DeleteQueueAndExchange(busOptions, serverQueueName);
+    }
+
+
 }

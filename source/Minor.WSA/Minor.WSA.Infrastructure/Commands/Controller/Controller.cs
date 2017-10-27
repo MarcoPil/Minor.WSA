@@ -20,7 +20,7 @@ namespace Minor.WSA.Infrastructure
         public void OpenCommandQueue(BusOptions busOptions)
         {
             BusOptions = busOptions;
-            busOptions.Provider.CreateQueue(QueueName);
+            busOptions.Provider.CreateCommandQueue(QueueName);
         }
 
         public void StartHandling()

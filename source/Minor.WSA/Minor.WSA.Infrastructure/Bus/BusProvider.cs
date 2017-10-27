@@ -6,6 +6,7 @@ using RabbitMQ.Client.Events;
 using System.Threading.Tasks;
 using System.Threading;
 using Minor.WSA.Infrastructure.Shared;
+using RabbitMQ.Client.Exceptions;
 
 namespace Minor.WSA.Infrastructure
 {
@@ -114,7 +115,7 @@ namespace Minor.WSA.Infrastructure
                                   consumer: consumer);
         }
 
-        public void CreateQueue(string queueName)
+        public void CreateCommandQueue(string queueName)
         {
             Channel.QueueDeclare(queue: queueName, durable: false, exclusive: false,
                                  autoDelete: false, arguments: null);
@@ -166,7 +167,14 @@ namespace Minor.WSA.Infrastructure
         public void StartReceivingCommands(string queueName, CommandReceivedCallback callback)
         {
             var consumer = new EventingBasicConsumer(Channel);
-            Channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
+            try
+            {
+                Channel.BasicConsume(queue: queueName, autoAck: false, consumer: consumer);
+            }
+            catch (OperationInterruptedException)
+            {
+                throw new MicroserviceException($"Cannot .StartReceivingCommands() on a non-existing queue. Queue with name '{queueName}' does not exist. Consider calling .CreateCommandQueue(\"{queueName}\") first.");
+            }
 
             consumer.Received += (model, ea) =>
             {

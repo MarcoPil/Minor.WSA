@@ -88,6 +88,7 @@ public class MicroserviceHostBuilderTest
             Assert.Equal(2, DiTestEventListener.GlobalCallCountHandle);
             Assert.Equal(2, DiTest.ContructionCount);
         }
+        RabbitTestHelp.DeleteQueueAndExchange(busOptions, "Unittest.WSA.DiTest");
     }
     #region DoDependencyInjection Test Dummies
     private interface IDiTest { }

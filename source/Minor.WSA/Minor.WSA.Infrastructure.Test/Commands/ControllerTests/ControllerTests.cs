@@ -17,7 +17,7 @@ public class ControllerTests
         var mock = new Mock<TestBusOptions>(MockBehavior.Loose);
         var providerMock = new Mock<IBusProvider>(MockBehavior.Strict);
         mock.Setup(option => option.Provider).Returns(providerMock.Object);
-        providerMock.Setup(p => p.CreateQueue(queueName)).Verifiable();
+        providerMock.Setup(p => p.CreateCommandQueue(queueName)).Verifiable();
 
         var target = new Controller(queueName, commandHandlers);
 
@@ -49,7 +49,7 @@ public class ControllerTests
         var mock = new Mock<TestBusOptions>(MockBehavior.Loose);
         var providerMock = new Mock<IBusProvider>(MockBehavior.Strict);
         mock.Setup(option => option.Provider).Returns(providerMock.Object);
-        providerMock.Setup(p => p.CreateQueue(It.IsAny<string>()));
+        providerMock.Setup(p => p.CreateCommandQueue(It.IsAny<string>()));
         providerMock.Setup(p => p.StartReceivingCommands(queueName, It.IsAny<CommandReceivedCallback>()))
                     .Verifiable();
 
@@ -69,7 +69,7 @@ public class ControllerTests
         var mock = new Mock<TestBusOptions>(MockBehavior.Loose);
         var providerMock = new Mock<IBusProvider>(MockBehavior.Strict);
         mock.Setup(option => option.Provider).Returns(providerMock.Object);
-        providerMock.Setup(p => p.CreateQueue(It.IsAny<string>()));
+        providerMock.Setup(p => p.CreateCommandQueue(It.IsAny<string>()));
         providerMock.Setup(p => p.StartReceivingCommands(queueName, It.IsAny<CommandReceivedCallback>()))
                     .Callback((string s, CommandReceivedCallback c) => { result = c; });
 
