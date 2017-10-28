@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Minor.WSA.Infrastructure.TestBus;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,8 +10,8 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
     public class TestBusProvider : IBusProvider
     {
         private Dictionary<string, TestEventQueue> _namedEventQueues;
-        private Dictionary<string, TestCommandQueue> _namedCommandQueues;
-        public IEnumerable<TestCommandQueue> CommandQueues => _namedCommandQueues.Values;
+        private Dictionary<string, TestQueue> _namedQueues;
+        public IEnumerable<TestQueue> Queues => _namedQueues.Values;
 
         public List<EventMessage> LoggedEventMessages { get; }
         public List<CommandRequestMessage> LoggedCommandRequestMessages { get; }
@@ -18,7 +19,8 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
         public TestBusProvider()
         {
             _namedEventQueues = new Dictionary<string, TestEventQueue>();
-            _namedCommandQueues = new Dictionary<string, TestCommandQueue>();
+            //_namedCommandQueues = new Dictionary<string, TestCommandQueue>();
+            _namedQueues = new Dictionary<string, TestQueue>();
             LoggedEventMessages = new List<EventMessage>();
             LoggedCommandRequestMessages = new List<CommandRequestMessage>();
         }
@@ -70,25 +72,40 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
         /// <param name="queueName"></param>
         public void CreateCommandQueue(string queueName)
         {
-            var testCommandQueue = new TestCommandQueue(queueName);
-            _namedCommandQueues.Add(queueName, testCommandQueue);
+            var testQueue = new TestQueue(queueName);
+            _namedQueues.Add(queueName, testQueue);
         }
 
         public Task<CommandResponseMessage> SendCommandAsync(CommandRequestMessage command)
         {
             LoggedCommandRequestMessages.Add(command);
-            if (_namedCommandQueues.ContainsKey(command.ServiceQueueName))
+            if (_namedQueues.ContainsKey(command.ServiceQueueName))
             {
-                _namedCommandQueues[command.ServiceQueueName].SendCommandAsync(command);
+                var message = new TestQueueMessage(
+                   routingKey: command.ServiceQueueName,
+                   type: command.CommandType,
+                   jsonBody: command.JsonMessage
+                );
+                _namedQueues[command.ServiceQueueName].BasicPublish(message);
             }
             return null;
         }
 
         public void StartReceivingCommands(string queueName, CommandReceivedCallback callback)
         {
-            if (_namedCommandQueues.ContainsKey(queueName))
+            if (_namedQueues.ContainsKey(queueName))
             {
-                _namedCommandQueues[queueName].Register(callback);
+                TestQueueCallback received = (TestQueueMessage message) =>
+                {
+                    var commandReceivedMessage = new CommandReceivedMessage(
+                        callbackQueueName: message.ReplyTo,
+                        correlationId: message.CorrelationId,
+                        commandType: message.Type,
+                        jsonMessage: message.JsonBody
+                    );
+                    callback(commandReceivedMessage);
+                };
+                _namedQueues[queueName].BasicConsume(received);
             }
             else
             {
