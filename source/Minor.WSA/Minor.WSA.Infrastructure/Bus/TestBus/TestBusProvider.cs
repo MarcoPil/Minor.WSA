@@ -10,7 +10,6 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
 {
     public class TestBusProvider : IBusProvider
     {
-        private Dictionary<string, TestEventQueue> _namedEventQueues;
         private Dictionary<string, TestQueue> _namedQueues;
         public IEnumerable<TestQueue> Queues => _namedQueues.Values;
 
@@ -19,8 +18,6 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
 
         public TestBusProvider()
         {
-            _namedEventQueues = new Dictionary<string, TestEventQueue>();
-            //_namedCommandQueues = new Dictionary<string, TestCommandQueue>();
             _namedQueues = new Dictionary<string, TestQueue>();
             LoggedEventMessages = new List<EventMessage>();
             LoggedCommandRequestMessages = new List<CommandRequestMessage>();
@@ -38,8 +35,8 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
         /// <param name="topicExpressions">all events having a routing key that matches one of these topicexpressions is added to the queue</param>
         public void CreateQueueWithTopics(string queueName, IEnumerable<string> topicExpressions)
         {
-            var eventQueue = new TestEventQueue(queueName, topicExpressions);
-            _namedEventQueues.Add(queueName, eventQueue);
+            var eventQueue = new TestQueue(queueName, topicExpressions);
+            _namedQueues.Add(queueName, eventQueue);
         }
 
         /// <summary>
@@ -50,9 +47,16 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
         public void PublishEvent(EventMessage eventMessage)
         {
             LoggedEventMessages.Add(eventMessage);
-            foreach (var eventQueue in _namedEventQueues.Values)
+            var message = new TestQueueMessage(
+               timestamp: eventMessage.Timestamp,
+               routingKey: eventMessage.RoutingKey,
+               correlationId: eventMessage.CorrelationId,
+               type: eventMessage.EventType,
+               jsonBody: eventMessage.JsonMessage
+            );
+            foreach (var eventQueue in _namedQueues.Values)
             {
-                eventQueue.EnqueueIfMatches(eventMessage.RoutingKey, eventMessage);
+                eventQueue.BasicPublish(message);
             }
         }
 
@@ -63,7 +67,26 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
         /// <param name="callback"></param>
         public void StartReceivingEvents(string queueName, EventReceivedCallback callback)
         {
-            _namedEventQueues[queueName].StartDequeueing(callback);
+            if (_namedQueues.ContainsKey(queueName))
+            {
+                TestQueueCallback receivedCallback = (TestQueueMessage receivedMessage) =>
+                {
+                    var eventMessage = new EventMessage(
+                        timestamp: receivedMessage.Timestamp ?? 0,
+                        routingKey: receivedMessage.RoutingKey,
+                        correlationId: receivedMessage.CorrelationId,
+                        eventType: receivedMessage.Type,
+                        jsonMessage: receivedMessage.JsonBody
+                    );
+
+                    callback(eventMessage);
+                };
+                _namedQueues[queueName].BasicConsume(receivedCallback);
+            }
+            else
+            {
+                throw new MicroserviceException($"Cannot .StartReceivingEvents() on a non-existing queue. Queue with name '{queueName}' does not exist. Consider calling .CreateQueueWithTopics(\"{queueName}\",[topics]) first.");
+            }
         }
 
         /// <summary>
