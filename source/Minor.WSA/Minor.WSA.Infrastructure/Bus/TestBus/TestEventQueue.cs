@@ -5,15 +5,13 @@ using System.Linq;
 
 namespace Minor.WSA.Infrastructure.Shared.TestBus
 {
-    internal class TestEventQueue
+    public class TestEventQueue
     {
-        private object _queueLock = new object();
         private bool _isQueueing;
-        private EventReceivedCallback _callbacks;
-
         public string QueueName { get; }
         public List<string> Topics { get; }
         public Queue<EventMessage> EventMessages { get; }
+        private EventReceivedCallback _callbacks;
 
         public TestEventQueue(string queueName, IEnumerable<string> topicExpressions)
         {

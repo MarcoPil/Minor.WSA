@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Minor.WSA.Infrastructure.Shared.TestBus
@@ -72,40 +73,80 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
         /// <param name="queueName"></param>
         public void CreateCommandQueue(string queueName)
         {
-            var testQueue = new TestQueue(queueName);
-            _namedQueues.Add(queueName, testQueue);
+            if (!_namedQueues.ContainsKey(queueName))
+            {
+                var testQueue = new TestQueue(queueName);
+                _namedQueues.Add(queueName, testQueue);
+            }
         }
 
         public Task<CommandResponseMessage> SendCommandAsync(CommandRequestMessage command)
         {
             LoggedCommandRequestMessages.Add(command);
-            if (_namedQueues.ContainsKey(command.ServiceQueueName))
+
+            CreateCommandQueue(command.ServiceQueueName);
+
+            var callbackQueueName = Guid.NewGuid().ToString();
+            var replyQueue = new TestQueue(callbackQueueName);
+            _namedQueues.Add(callbackQueueName, replyQueue);
+            var correlationId = Guid.NewGuid().ToString();
+
+            CommandResponseMessage response = null;
+            var receiveHandle = new AutoResetEvent(false);
+            TestQueueCallback callback = (TestQueueMessage resultMessage) =>
             {
-                var message = new TestQueueMessage(
-                   routingKey: command.ServiceQueueName,
-                   type: command.CommandType,
-                   jsonBody: command.JsonMessage
-                );
-                _namedQueues[command.ServiceQueueName].BasicPublish(message);
-            }
-            return null;
+                if (correlationId == resultMessage.CorrelationId)
+                {
+                    response = new CommandResponseMessage(
+                        callbackQueueName: resultMessage.ReplyTo,
+                        correlationId: resultMessage.CorrelationId,
+                        jsonMessage: resultMessage.JsonBody
+                    );
+                    receiveHandle.Set();
+                }
+            };
+            replyQueue.BasicConsume(callback);
+
+            var message = new TestQueueMessage(
+               routingKey: command.ServiceQueueName,
+               replyTo: callbackQueueName,
+               correlationId: correlationId,
+               type: command.CommandType,
+               jsonBody: command.JsonMessage
+            );
+            _namedQueues[command.ServiceQueueName].BasicPublish(message);
+
+            return Task<CommandResponseMessage>.Factory.StartNew(() =>
+            {
+                receiveHandle.WaitOne();
+                return response;
+            });
         }
 
         public void StartReceivingCommands(string queueName, CommandReceivedCallback callback)
         {
             if (_namedQueues.ContainsKey(queueName))
             {
-                TestQueueCallback received = (TestQueueMessage message) =>
+                TestQueueCallback receivedCallback = (TestQueueMessage receivedMessage) =>
                 {
                     var commandReceivedMessage = new CommandReceivedMessage(
-                        callbackQueueName: message.ReplyTo,
-                        correlationId: message.CorrelationId,
-                        commandType: message.Type,
-                        jsonMessage: message.JsonBody
+                        callbackQueueName: receivedMessage.ReplyTo,
+                        correlationId: receivedMessage.CorrelationId,
+                        commandType: receivedMessage.Type,
+                        jsonMessage: receivedMessage.JsonBody
                     );
-                    callback(commandReceivedMessage);
+
+                    CommandResultMessage commandResultMessage = callback(commandReceivedMessage);
+
+                    var resultMessage = new TestQueueMessage(
+                        routingKey: receivedMessage.ReplyTo,
+                        correlationId: receivedMessage.CorrelationId,
+                        type: commandResultMessage.Type,
+                        jsonBody: commandResultMessage.JsonMessage
+                    );
+                    _namedQueues[receivedMessage.ReplyTo].BasicPublish(resultMessage);
                 };
-                _namedQueues[queueName].BasicConsume(received);
+                _namedQueues[queueName].BasicConsume(receivedCallback);
             }
             else
             {

@@ -97,7 +97,7 @@ public class TestBusTests
         {
             receivedCommand = crm;
             handle.Set();
-            return null;
+            return new CommandResultMessage("ResultType", "ResultPayload");
         };
         target.StartReceivingCommands("text7CommandQ", callback);
         var commandRequestMessage = new CommandRequestMessage("text7CommandQ", "CommandType", "payload");
@@ -107,10 +107,36 @@ public class TestBusTests
 
         bool received = handle.WaitOne(100);
         Assert.True(received);
-//        Assert.NotNull(receivedCommand.CallbackQueueName);
-//        Assert.NotNull(receivedCommand.CorrelationId);
+        Assert.NotNull(receivedCommand.CallbackQueueName);
+        Assert.NotNull(receivedCommand.CorrelationId);
         Assert.Equal("CommandType", receivedCommand.CommandType);
         Assert.Equal("payload", receivedCommand.JsonMessage);
+    }
+
+    [Fact]
+    public void AfterSendingACommand_TheCorrectReplyToQueueIsRegistered()
+    {
+        var target = new TestBusProvider();
+        target.CreateCommandQueue("text7aCommandQ");
+
+        CommandReceivedMessage receivedCommand = null;
+        var handle = new AutoResetEvent(false);
+
+        CommandReceivedCallback callback = (CommandReceivedMessage crm) =>
+        {
+            receivedCommand = crm;
+            handle.Set();
+            return new CommandResultMessage("ResultType", "ResultPayload");
+        };
+        target.StartReceivingCommands("text7aCommandQ", callback);
+        var commandRequestMessage = new CommandRequestMessage("text7aCommandQ", "CommandType", "payload");
+
+        // Act
+        target.SendCommandAsync(commandRequestMessage);
+
+        bool received = handle.WaitOne(100);
+        Assert.True(received);
+        Assert.Contains(target.Queues, q => q.QueueName == receivedCommand.CallbackQueueName);
     }
 
 
@@ -133,7 +159,7 @@ public class TestBusTests
         {
             receiveCount++;
             handle.Set();
-            return null;
+            return new CommandResultMessage("ResultType", "ResultPayload");
         };
 
         // Act
@@ -142,5 +168,51 @@ public class TestBusTests
         bool received = handle.WaitOne(100);
         Assert.True(received);
         Assert.Equal(3, receiveCount);
+    }
+
+    [Fact]
+    public void SendCommandAsync_ReceivesAnAnswer()
+    {
+        var target = new TestBusProvider();
+        target.CreateCommandQueue("text9CommandQ");
+
+        CommandReceivedCallback callback = (CommandReceivedMessage crm) =>
+        {
+            return new CommandResultMessage("ResponseType", "responsePayload");
+        };
+        target.StartReceivingCommands("text9CommandQ", callback);
+
+        // Act
+        var commandRequestMessage = new CommandRequestMessage("text9CommandQ", "CommandType", "payload");
+        var responseTask = target.SendCommandAsync(commandRequestMessage);
+
+        bool received = responseTask.Wait(100);
+        Assert.True(received);
+        var responseMessage = responseTask.Result;
+        Assert.Equal("responsePayload", responseMessage.JsonMessage);
+    }
+
+
+    [Fact]
+    public void SendCommandAsync_CanSendBeforeReceiverIsRegistered()
+    {
+        var target = new TestBusProvider();
+
+        // Act - Send command ...
+        var commandRequestMessage = new CommandRequestMessage("text10CommandQ", "CommandType", "payload");
+        var responseTask = target.SendCommandAsync(commandRequestMessage);
+
+        // Act - ... before receiver is registered
+        target.CreateCommandQueue("text10CommandQ");
+        CommandReceivedCallback callback = (CommandReceivedMessage crm) =>
+        {
+            return new CommandResultMessage("ResponseType", "responsePayload");
+        };
+        target.StartReceivingCommands("text10CommandQ", callback);
+
+        bool received = responseTask.Wait(100);
+        Assert.True(received);
+        var responseMessage = responseTask.Result;
+        Assert.Equal("responsePayload", responseMessage.JsonMessage);
     }
 }
