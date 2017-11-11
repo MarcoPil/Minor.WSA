@@ -1,5 +1,5 @@
 ﻿using Minor.WSA.Infrastructure;
-using Minor.WSA.Infrastructure.Shared.TestBus;
+using Minor.WSA.Infrastructure.TestBus;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -192,7 +192,6 @@ public class TestBusTests
         Assert.Equal("responsePayload", responseMessage.JsonMessage);
     }
 
-
     [Fact]
     public void SendCommandAsync_CanSendBeforeReceiverIsRegistered()
     {
@@ -214,5 +213,27 @@ public class TestBusTests
         Assert.True(received);
         var responseMessage = responseTask.Result;
         Assert.Equal("responsePayload", responseMessage.JsonMessage);
+    }
+
+
+    [Fact]
+    public void CommandResultsAreLogged()
+    {
+        var target = new TestBusProvider();
+        target.CreateCommandQueue("text11CommandQ");
+
+        var result = new CommandResultMessage("ResponseType", "responsePayload");
+        CommandReceivedCallback callback = (CommandReceivedMessage crm) =>
+        {
+            return result;
+        };
+        target.StartReceivingCommands("text11CommandQ", callback);
+
+        var commandRequestMessage = new CommandRequestMessage("text11CommandQ", "CommandType", "payload");
+        var responseTask = target.SendCommandAsync(commandRequestMessage);
+
+        bool received = responseTask.Wait(100);
+        Assert.True(received);
+        Assert.Contains(result, target.LoggedCommandResultMessages);
     }
 }

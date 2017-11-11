@@ -1,5 +1,5 @@
 ﻿using Minor.WSA.Common;
-using Minor.WSA.Infrastructure.Shared.TestBus;
+using Minor.WSA.Infrastructure.TestBus;
 using System;
 using System.Collections.Generic;
 using System.Linq;

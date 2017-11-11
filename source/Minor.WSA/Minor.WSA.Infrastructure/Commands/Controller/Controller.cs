@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using Minor.WSA.Common;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Minor.WSA.Infrastructure
 {
@@ -41,7 +43,8 @@ namespace Minor.WSA.Infrastructure
                 }
                 catch (FunctionalException ex)
                 {
-                    var resultJson = JsonConvert.SerializeObject(ex.ErrorList);
+                    Error[] errors = ex.ErrorList.ToArray();
+                    var resultJson = JsonConvert.SerializeObject(errors);
                     result = new CommandResultMessage("FunctionalException", resultJson);
                 }
                 catch

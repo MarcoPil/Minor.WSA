@@ -1,4 +1,4 @@
-﻿using Minor.WSA.Infrastructure.Shared.TestBus;
+﻿using Minor.WSA.Infrastructure.TestBus;
 using Newtonsoft.Json;
 using System;
 

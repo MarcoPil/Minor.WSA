@@ -11,6 +11,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <DebugType>Full</DebugType>
+    <Version>1.0.0-alpha1-build4</Version>
   </PropertyGroup>
 
   <ItemGroup>

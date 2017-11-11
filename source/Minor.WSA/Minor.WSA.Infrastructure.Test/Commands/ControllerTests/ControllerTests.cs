@@ -1,5 +1,6 @@
-﻿using Minor.WSA.Infrastructure;
-using Minor.WSA.Infrastructure.Shared.TestBus;
+﻿using Minor.WSA.Common;
+using Minor.WSA.Infrastructure;
+using Minor.WSA.Infrastructure.TestBus;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -194,9 +195,8 @@ public class ControllerTests
     }
 
     [Fact]
-    public void IfDispatchedCommandThrowsFunctionExceptionthenTheExeptionIsPassedToClient()
+    public void IfDispatchedCommandThrowsFunctionExceptionThenExeptionIsPassedToClient()
     {
-
         var crm1 = new CommandReceivedMessage("cQN", "cId", "Command1", "jsonMessage");
         var fex = new FunctionalException();
         fex.Add(new Error("US201", "Name cannot be empty"));

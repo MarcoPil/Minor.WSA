@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using RabbitMQ.Client.Events;
 using System.Threading.Tasks;
 using System.Threading;
-using Minor.WSA.Infrastructure.Shared;
 using RabbitMQ.Client.Exceptions;
 
 namespace Minor.WSA.Infrastructure
@@ -137,6 +136,7 @@ namespace Minor.WSA.Infrastructure
                     commandResponseMessage = new CommandResponseMessage(
                         callbackQueueName: replyQueueName,
                         correlationId: correlationId,
+                        type: ea.BasicProperties.Type,
                         jsonMessage: Encoding.UTF8.GetString(ea.Body)
                     );
                     receiveHandle.Set();
@@ -188,12 +188,13 @@ namespace Minor.WSA.Infrastructure
                 );
 
                 // execute command
-                var commandResponse = callback(commandReceivedMessage); 
+                CommandResultMessage commandResultMessage = callback(commandReceivedMessage); 
 
                 // send response
                 IBasicProperties responseProps = Channel.CreateBasicProperties();
                 responseProps.CorrelationId = receivedProps.CorrelationId;
-                var buffer = Encoding.UTF8.GetBytes(commandResponse.JsonMessage);
+                responseProps.Type = commandResultMessage.Type;
+                var buffer = Encoding.UTF8.GetBytes(commandResultMessage.JsonMessage);
                 Channel.BasicPublish(exchange: "",
                                      routingKey: receivedProps.ReplyTo,
                                      basicProperties: responseProps,

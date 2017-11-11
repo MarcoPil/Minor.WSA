@@ -1,5 +1,4 @@
-﻿using Minor.WSA.Infrastructure.Shared;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Minor.WSA.Infrastructure
@@ -12,7 +11,7 @@ namespace Minor.WSA.Infrastructure
         private bool _isListening;
         public BusOptions BusOptions { get; }
         public IEnumerable<IEventListener> EventListeners { get; }
-        public IEnumerable<IController> Controllers { get; set; }
+        public IEnumerable<IController> Controllers { get; }
 
         public MicroserviceHost(IEnumerable<IEventListener> eventListeners,
                                 IEnumerable<IController> controllers,

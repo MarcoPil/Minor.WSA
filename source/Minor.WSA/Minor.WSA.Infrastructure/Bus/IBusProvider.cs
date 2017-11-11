@@ -1,5 +1,4 @@
-﻿using Minor.WSA.Infrastructure.Shared;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

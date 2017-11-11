@@ -1,6 +1,5 @@
 ﻿using Minor.WSA.Infrastructure;
-using Minor.WSA.Infrastructure.Shared;
-using Minor.WSA.Infrastructure.Shared.TestBus;
+using Minor.WSA.Infrastructure.TestBus;
 using Minor.WSA.Infrastructure.Test;
 using Minor.WSA.Infrastructure.Test.EventHandlerTests;
 using Moq;

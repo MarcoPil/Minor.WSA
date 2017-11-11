@@ -278,5 +278,4 @@ public class BusProviderCommanderTests
         RabbitTestHelp.DeleteQueueAndExchange(busOptions, serverQueueName);
     }
 
-
 }

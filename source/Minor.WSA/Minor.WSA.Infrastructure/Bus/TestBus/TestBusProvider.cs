@@ -1,12 +1,11 @@
-﻿using Minor.WSA.Infrastructure.TestBus;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Minor.WSA.Infrastructure.Shared.TestBus
+namespace Minor.WSA.Infrastructure.TestBus
 {
     public class TestBusProvider : IBusProvider
     {
@@ -15,12 +14,14 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
 
         public List<EventMessage> LoggedEventMessages { get; }
         public List<CommandRequestMessage> LoggedCommandRequestMessages { get; }
+        public List<CommandResultMessage> LoggedCommandResultMessages { get; }
 
         public TestBusProvider()
         {
             _namedQueues = new Dictionary<string, TestQueue>();
             LoggedEventMessages = new List<EventMessage>();
             LoggedCommandRequestMessages = new List<CommandRequestMessage>();
+            LoggedCommandResultMessages = new List<CommandResultMessage>();
         }
         public void CreateConnection()
         {
@@ -123,6 +124,7 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
                     response = new CommandResponseMessage(
                         callbackQueueName: resultMessage.ReplyTo,
                         correlationId: resultMessage.CorrelationId,
+                        type: resultMessage.Type,
                         jsonMessage: resultMessage.JsonBody
                     );
                     receiveHandle.Set();
@@ -160,6 +162,8 @@ namespace Minor.WSA.Infrastructure.Shared.TestBus
                     );
 
                     CommandResultMessage commandResultMessage = callback(commandReceivedMessage);
+
+                    LoggedCommandResultMessages.Add(commandResultMessage);
 
                     var resultMessage = new TestQueueMessage(
                         routingKey: receivedMessage.ReplyTo,

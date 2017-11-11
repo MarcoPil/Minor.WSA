@@ -9,7 +9,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <Version>1.0.0-alpha1-build2</Version>
+    <Version>1.0.0-alpha1-build4</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <DebugType>Full</DebugType>
   </PropertyGroup>
@@ -25,10 +25,6 @@
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="RabbitMQ.Client" Version="5.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Commands\Commander\" />
   </ItemGroup>
 
 </Project>

@@ -24,11 +24,19 @@ namespace Minor.WSA.Infrastructure
             var paramObj = JsonConvert.DeserializeObject(commandReceivedMessage.JsonMessage, ParamType);
             var instance = Factory.GetInstance();
 
-            var result = Method.Invoke(instance, new object[] { paramObj });
+            try
+            {
+                var result = Method.Invoke(instance, new object[] { paramObj });
 
-            var resultType = ReturnType.ToString();
-            var resultJson = JsonConvert.SerializeObject(result);
-            return new CommandResultMessage(resultType, resultJson);
+                var resultType = ReturnType.ToString();
+                var resultJson = JsonConvert.SerializeObject(result);
+                return new CommandResultMessage(resultType, resultJson);
+
+            }
+            catch (TargetInvocationException ex)
+            {
+                throw ex.InnerException;
+            }
         }
     }
 }
